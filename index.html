@@ -24,7 +24,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
 #palette-head p{font-size:11.5px;color:var(--ink2);margin-top:5px;line-height:1.6;}
 #palette-scroll{flex:1;overflow-y:auto;padding:10px 14px 24px;}
 
-.fam-section{margin-bottom:6px;border-bottom:1px solid var(--border);}
+.fam-section{margin-bottom:0;}
 .fam-head{display:flex;align-items:center;gap:8px;padding:12px 4px;cursor:pointer;user-select:none;}
 .fam-head .fam-badge{width:26px;height:26px;border-radius:7px;background:var(--teal);color:#fff;
   font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
@@ -33,9 +33,21 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
 .fam-head .fam-meta .t2{font-size:10.5px;color:var(--ink3);margin-top:1px;}
 .fam-head .fam-caret{font-size:10px;color:var(--ink3);transition:transform .15s;}
 .fam-section.open .fam-caret{transform:rotate(90deg);}
-.fam-section.disabled .fam-head{opacity:.4;}
-.fam-section.disabled .fam-grid{opacity:.35;pointer-events:none;filter:grayscale(1);}
-.fam-section.active .fam-badge{box-shadow:0 0 0 3px var(--teal-tint);}
+.group-block.disabled .fam-head{opacity:.4;}
+.group-block.disabled .fam-grid{opacity:.35;pointer-events:none;filter:grayscale(1);}
+.group-block.active .fam-badge{box-shadow:0 0 0 3px var(--teal-tint);}
+
+/* 可混搭群組的包裝視覺：把同組的系列框在一起，一眼看出誰跟誰是一夥的 */
+.group-block{border:1.5px solid var(--border);border-radius:10px;margin-bottom:14px;padding:4px 6px 2px;
+  transition:border-color .15s,background .15s;}
+.group-block.mixable{border-style:solid;background:linear-gradient(180deg,var(--teal-tint) 0,transparent 46px);}
+.group-block.solo{border-style:dashed;}
+.group-block.active.mixable{border-color:var(--teal);}
+.group-block .group-label{font-size:10px;font-weight:700;color:var(--teal-dark);padding:6px 8px 2px;
+  letter-spacing:.2px;}
+.group-block.solo .group-label{color:var(--ink3);}
+.group-block .fam-section{border-bottom:1px dashed var(--border);}
+.group-block .fam-section:last-child{border-bottom:none;}
 
 .fam-grid{display:none;grid-template-columns:1fr 1fr;gap:8px;padding:2px 4px 14px;}
 .fam-section.open .fam-grid{display:grid;}
@@ -90,6 +102,42 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
 #empty-drop .hint b{color:var(--ink2);font-size:13px;display:block;margin-bottom:4px;}
 
 #footnote{font-size:11px;color:var(--ink3);line-height:1.7;max-width:760px;}
+
+/* ══════════════ 編輯權限鎖 ══════════════ */
+#lock-fab{position:fixed;right:22px;bottom:22px;width:48px;height:48px;border-radius:50%;
+  border:none;background:var(--ink);color:#fff;font-size:19px;cursor:pointer;
+  box-shadow:var(--shadow-md);z-index:50;transition:transform .12s,background .12s;}
+#lock-fab:hover{transform:translateY(-2px);}
+#lock-fab.unlocked{background:var(--teal);}
+#lock-fab.pulse{animation:lockPulse .35s ease;}
+@keyframes lockPulse{0%,100%{transform:translateX(0);}25%{transform:translateX(-4px);}75%{transform:translateX(4px);}}
+
+#pin-overlay{display:none;position:fixed;inset:0;background:rgba(20,30,28,.45);
+  align-items:center;justify-content:center;z-index:60;}
+#pin-overlay.show{display:flex;}
+#pin-box{background:#fff;border-radius:var(--radius);padding:26px 28px;width:280px;
+  box-shadow:var(--shadow-md);text-align:center;}
+#pin-title{font-size:13px;font-weight:700;margin-bottom:14px;}
+#pin-input{width:100%;text-align:center;font-size:22px;letter-spacing:10px;padding:10px 0;
+  border:1px solid var(--border-strong);border-radius:var(--radius-sm);outline:none;}
+#pin-input:focus{border-color:var(--teal);}
+#pin-error{display:none;color:var(--danger);font-size:11.5px;margin-top:8px;}
+#pin-error.show{display:block;}
+#pin-actions{display:flex;gap:8px;margin-top:16px;}
+#pin-actions .btn{flex:1;}
+
+.t1.editable{cursor:text;}
+.t1.editable:hover{text-decoration:underline dotted;text-decoration-color:var(--ink3);}
+.fam-rename-input{font-size:12.5px;font-weight:700;border:1px solid var(--teal);border-radius:4px;
+  padding:2px 6px;width:100%;outline:none;}
+
+#edit-banner{display:none;position:fixed;left:50%;bottom:22px;transform:translateX(-50%);
+  background:var(--ink);color:#fff;font-size:12px;padding:9px 16px;border-radius:999px;
+  box-shadow:var(--shadow-md);z-index:49;align-items:center;gap:12px;}
+#edit-banner.show{display:flex;}
+#edit-banner button{background:var(--teal);border:none;color:#fff;font-size:11.5px;
+  padding:5px 12px;border-radius:999px;cursor:pointer;font-weight:700;}
+#edit-banner button.relock{background:rgba(255,255,255,.15);}
 </style>
 </head>
 <body>
@@ -117,6 +165,27 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
     </div>
   </div>
 
+</div>
+
+<!-- ══════════════ 編輯權限鎖 ══════════════ -->
+<button id="lock-fab" title="解鎖編輯家族名稱">🔒</button>
+
+<div id="pin-overlay">
+  <div id="pin-box">
+    <div id="pin-title">輸入 4 碼密碼解鎖編輯</div>
+    <input id="pin-input" type="password" inputmode="numeric" maxlength="4" autocomplete="off">
+    <div id="pin-error">密碼錯誤，再試一次</div>
+    <div id="pin-actions">
+      <button class="btn ghost" id="pin-cancel">取消</button>
+      <button class="btn primary" id="pin-submit">解鎖</button>
+    </div>
+  </div>
+</div>
+
+<div id="edit-banner">
+  <span>🔓 編輯模式中，家族名稱可以點兩下修改</span>
+  <button id="btn-export-config">⬇ 下載設定 JSON</button>
+  <button class="relock" id="btn-relock">鎖上</button>
 </div>
 
 <script id="wo-manifest" type="application/json">
@@ -610,15 +679,82 @@ var MANIFEST = JSON.parse(document.getElementById('wo-manifest').textContent);
 var FAMILIES = MANIFEST.families;
 var FAM_KEYS = Object.keys(FAMILIES).sort();
 var STORAGE_KEY = 'wo_canvas_state_v1';
+var NAMES_KEY = 'wo_family_names_v1';
+var UNLOCK_KEY = 'wo_unlocked_v1';
+var EDIT_PIN = '8888'; /* ⚠ 純前端的軟性防呆，不是真正的權限控管，任何人打開瀏覽器原始碼都能看到，只是擋掉一般人手滑誤改 */
 
-/* state.family: null 或 'A'~'F'
-   state.slots: 陣列，長度依家族 maxPerRow 決定，每格是 {family,file,variant,combo,label} 或 null */
-var state = loadState() || { family: null, slots: [null, null, null, null] };
+/* 可混搭群組：同一排可以混插同一群組裡的不同系列（例如A、B混著放）。
+   F 只有自己一個系列、不可跟任何人混搭。 */
+var GROUPS = {
+  AB:  { families: ['A', 'B'],      label: '可混搭' },
+  CDE: { families: ['C', 'D', 'E'], label: '可混搭' },
+  F:   { families: ['F'],           label: '不可混搭' }
+};
+var FAMILY_GROUP = {};
+Object.keys(GROUPS).forEach(function (g) {
+  GROUPS[g].families.forEach(function (fam) { FAMILY_GROUP[fam] = g; });
+});
+function groupOf(fam) { return FAMILY_GROUP[fam] || fam; }
+/* 群組的寬度/每排上限，直接沿用該群組裡任一系列的資料（同群組內尺寸本來就相同） */
+function groupWidth(g) { var fam = GROUPS[g].families[0]; return famWidth(fam); }
+function groupMaxPerRow(g) { var fam = GROUPS[g].families[0]; return maxPerRow(fam); }
+
+/* 本機編輯（只有這台瀏覽器、解鎖後才會寫入） */
+var familyNames = loadNames();
+/* 從 config.json 讀到的「大家共用」設定，file:// 打開或還沒放 config.json 時會是空物件 */
+var remoteNames = {};
+/* 這台瀏覽器目前是否已解鎖編輯 */
+var unlocked = false;
+try { unlocked = sessionStorage.getItem(UNLOCK_KEY) === '1'; } catch (e) { /* 有些環境(如file://的部分瀏覽器)存取會被擋，安靜略過 */ }
+
+function loadNames() {
+  try { return JSON.parse(localStorage.getItem(NAMES_KEY)) || {}; }
+  catch (e) { return {}; }
+}
+function saveNames() {
+  try { localStorage.setItem(NAMES_KEY, JSON.stringify(familyNames)); }
+  catch (e) { /* 存不了就算了 */ }
+}
+function familyLabel(fam) {
+  return familyNames[fam] || remoteNames[fam] || (FAMILIES[fam] && FAMILIES[fam].name) || ('副區 ' + fam);
+}
+function loadRemoteConfig(cb) {
+  if (typeof fetch !== 'function') { cb && cb(); return; }
+  fetch('config.json?t=' + Date.now())
+    .then(function (r) { return r.ok ? r.json() : {}; })
+    .then(function (d) { remoteNames = (d && d.familyNames) || {}; cb && cb(); })
+    .catch(function () { cb && cb(); }); /* file:// 打開或檔案不存在都會走到這裡，不影響其他功能 */
+}
+function downloadJSON(obj, filename) {
+  var blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+}
+function exportConfig() {
+  var out = { familyNames: {} };
+  FAM_KEYS.forEach(function (f) { out.familyNames[f] = familyLabel(f); });
+  downloadJSON(out, 'config.json');
+}
+
+/* state.group: null 或 'AB' / 'CDE' / 'F'（可混搭群組，不是單一系列）
+   state.slots: 陣列，長度依群組 maxPerRow 決定，每格是 {family,file,variant,combo,label} 或 null */
+var state = loadState() || { group: null, slots: [null, null, null, null] };
 var selectedThumb = null; /* 點選模式：{family,file,variant,combo,label} */
 
 function loadState() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)); }
-  catch (e) { return null; }
+  try {
+    var s = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if (s && s.group === undefined && s.family !== undefined) {
+      /* 舊版資料格式遷移：以前存的是單一系列(state.family)，換成群組(state.group) */
+      s.group = s.family === null ? null : groupOf(s.family);
+      delete s.family;
+    }
+    return s;
+  } catch (e) { return null; }
 }
 function saveState() {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
@@ -629,42 +765,84 @@ function maxPerRow(fam) { return FAMILIES[fam] ? FAMILIES[fam].maxPerRow : 4; }
 function famWidth(fam) { return FAMILIES[fam] ? FAMILIES[fam].width : 300; }
 
 /* ════════════════════════════════════════
-   左側素材庫渲染
+   左側素材庫渲染（依可混搭群組分區塊呈現）
 ════════════════════════════════════════ */
 function renderPalette() {
   var wrap = document.getElementById('palette-scroll');
-  wrap.innerHTML = FAM_KEYS.map(function (fam) {
-    var f = FAMILIES[fam];
-    var isActive = state.family === fam;
-    var isDisabled = state.family !== null && state.family !== fam;
-    var thumbs = f.items.map(function (item) {
-      var isSel = selectedThumb && selectedThumb.family === fam && selectedThumb.file === item.file;
-      return '<div class="thumb' + (isSel ? ' selected' : '') + '" draggable="true" ' +
-        'data-fam="' + fam + '" data-file="' + item.file + '" data-variant="' + item.variant + '" data-combo="' + item.combo + '" data-label="' + esc(item.label) + '" ' +
-        'style="--ar:' + f.width + '/' + f.height + '">' +
-        '<img src="img/' + item.file + '" loading="lazy" alt="' + esc(item.label) + '">' +
-        '<div class="cap">' + esc(item.label) + '</div>' +
+
+  wrap.innerHTML = Object.keys(GROUPS).map(function (g) {
+    var group = GROUPS[g];
+    var isMixable = group.families.length > 1;
+    var isActiveGroup = state.group === g;
+    var isDisabledGroup = state.group !== null && state.group !== g;
+
+    var famsHtml = group.families.map(function (fam) {
+      var f = FAMILIES[fam];
+      var thumbs = f.items.map(function (item) {
+        var isSel = selectedThumb && selectedThumb.family === fam && selectedThumb.file === item.file;
+        return '<div class="thumb' + (isSel ? ' selected' : '') + '" draggable="true" ' +
+          'data-fam="' + fam + '" data-file="' + item.file + '" data-variant="' + item.variant + '" data-combo="' + item.combo + '" data-label="' + esc(item.label) + '" ' +
+          'style="--ar:' + f.width + '/' + f.height + '">' +
+          '<img src="img/' + item.file + '" loading="lazy" alt="' + esc(item.label) + '">' +
+          '<div class="cap">' + esc(item.label) + '</div>' +
+        '</div>';
+      }).join('');
+      return '<div class="fam-section' + (isActiveGroup ? ' open' : '') + '" data-fam="' + fam + '">' +
+        '<div class="fam-head">' +
+          '<div class="fam-badge">' + fam + '</div>' +
+          '<div class="fam-meta"><div class="t1" data-fam="' + fam + '" title="點兩下改名">' + esc(familyLabel(fam)) + '</div>' +
+          '<div class="t2">' + f.width + '×' + f.height + '　每排最多 ' + f.maxPerRow + ' 個</div></div>' +
+          '<div class="fam-caret">▶</div>' +
+        '</div>' +
+        '<div class="fam-grid">' + thumbs + '</div>' +
       '</div>';
     }).join('');
-    return '<div class="fam-section' + (isActive ? ' open active' : '') + (isDisabled ? ' disabled' : '') + '" data-fam="' + fam + '">' +
-      '<div class="fam-head">' +
-        '<div class="fam-badge">' + fam + '</div>' +
-        '<div class="fam-meta"><div class="t1">系列 ' + fam + '</div>' +
-        '<div class="t2">' + f.width + '×' + f.height + '　每排最多 ' + f.maxPerRow + ' 個</div></div>' +
-        '<div class="fam-caret">▶</div>' +
-      '</div>' +
-      '<div class="fam-grid">' + thumbs + '</div>' +
+
+    return '<div class="group-block' + (isMixable ? ' mixable' : ' solo') +
+      (isActiveGroup ? ' active' : '') + (isDisabledGroup ? ' disabled' : '') + '" data-group="' + g + '">' +
+      '<div class="group-label">' + (isMixable ? '🔗 可混搭・同排能混插' : '🚫 不可混搭') + '</div>' +
+      famsHtml +
     '</div>';
   }).join('');
 
-  /* 手風琴展開/收合 */
+  /* 手風琴展開/收合（每個系列各自獨立展開，跟群組disabled無關的話允許操作） */
   wrap.querySelectorAll('.fam-head').forEach(function (head) {
-    head.addEventListener('click', function () {
+    head.addEventListener('click', function (e) {
+      if (e.target.classList.contains('t1') || e.target.closest('.t1')) return; /* 改名時不要順便展開/收合 */
       var section = head.closest('.fam-section');
-      if (section.classList.contains('disabled')) return;
+      if (section.closest('.group-block').classList.contains('disabled')) return;
       var willOpen = !section.classList.contains('open');
       wrap.querySelectorAll('.fam-section').forEach(function (s) { s.classList.remove('open'); });
       if (willOpen) section.classList.add('open');
+    });
+  });
+
+  /* 名稱：解鎖後才能點兩下改名，Enter或失焦儲存，Esc取消 */
+  wrap.querySelectorAll('.t1').forEach(function (label) {
+    label.classList.toggle('editable', unlocked);
+    label.addEventListener('dblclick', function (e) {
+      e.stopPropagation();
+      if (!unlocked) { pulseLock(); return; }
+      var fam = label.getAttribute('data-fam');
+      var input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'fam-rename-input';
+      input.value = familyLabel(fam);
+      label.replaceWith(input);
+      input.focus();
+      input.select();
+
+      function commit() {
+        var v = input.value.trim();
+        familyNames[fam] = v || ('副區 ' + fam);
+        saveNames();
+        renderPalette();
+      }
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { commit(); }
+        else if (e.key === 'Escape') { renderPalette(); }
+      });
+      input.addEventListener('blur', commit);
     });
   });
 
@@ -682,7 +860,7 @@ function renderPalette() {
       e.dataTransfer.effectAllowed = 'copy';
     });
     el.addEventListener('click', function () {
-      if (el.closest('.fam-section').classList.contains('disabled')) return;
+      if (el.closest('.group-block').classList.contains('disabled')) return;
       selectedThumb = (selectedThumb && selectedThumb.file === info.file) ? null : info;
       renderPalette();
     });
@@ -698,22 +876,24 @@ function esc(s) {
    放置一張圖到畫布（統一入口：拖曳跟點選都走這裡）
 ════════════════════════════════════════ */
 function placeImage(info, slotIndex) {
-  if (info.family === 'F') {
-    /* F 系列特殊規則：選了就直接把 4 格全部套上同一張圖，其餘系列反灰 */
-    state.family = 'F';
-    var n = maxPerRow('F');
+  var g = groupOf(info.family);
+
+  if (g === 'F') {
+    /* F 群組特殊規則：選了就直接把 4 格全部套上同一張圖，其餘系列反灰 */
+    state.group = 'F';
+    var n = groupMaxPerRow('F');
     state.slots = [];
     for (var i = 0; i < n; i++) state.slots.push(Object.assign({}, info));
     finishPlacement();
     return;
   }
 
-  if (state.family === null) {
-    state.family = info.family;
-    state.slots = new Array(maxPerRow(info.family)).fill(null);
+  if (state.group === null) {
+    state.group = g;
+    state.slots = new Array(groupMaxPerRow(g)).fill(null);
     slotIndex = (slotIndex == null) ? 0 : slotIndex;
   }
-  if (info.family !== state.family) return; /* 系列不符，不放 */
+  if (g !== state.group) return; /* 群組不符（不可混搭），不放 */
   if (slotIndex == null) {
     /* 點選模式沒有指定格子：放進第一個空格 */
     slotIndex = state.slots.findIndex(function (s) { return !s; });
@@ -733,7 +913,7 @@ function finishPlacement() {
 function removeSlot(idx) {
   state.slots[idx] = null;
   if (state.slots.every(function (s) { return !s; })) {
-    state.family = null;
+    state.group = null;
     state.slots = [null, null, null, null];
   }
   saveState();
@@ -742,7 +922,7 @@ function removeSlot(idx) {
 }
 
 function clearCanvas() {
-  state.family = null;
+  state.group = null;
   state.slots = [null, null, null, null];
   selectedThumb = null;
   saveState();
@@ -757,11 +937,11 @@ function renderCanvas() {
   var stage = document.getElementById('stage');
   var info = document.getElementById('canvas-info');
 
-  if (state.family === null) {
+  if (state.group === null) {
     stage.innerHTML =
       '<div id="empty-drop">' +
         '<div class="hint"><span class="icon">🗳️</span><b>把任意一張圖拖到這裡開始排版</b>' +
-        '選第一張圖之後，畫布會依照那個系列自動決定可以放幾格</div>' +
+        '選第一張圖之後，畫布會依照那個群組自動決定可以放幾格</div>' +
       '</div>';
     var dz = document.getElementById('empty-drop');
     dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('dragover-ok'); });
@@ -776,7 +956,8 @@ function renderCanvas() {
     return;
   }
 
-  var fam = state.family, w = famWidth(fam), n = maxPerRow(fam);
+  var g = state.group, w = groupWidth(g), n = groupMaxPerRow(g);
+  var groupLabel = GROUPS[g].families.join('/');
   var rowEl = document.createElement('div');
   rowEl.id = 'row';
 
@@ -789,13 +970,13 @@ function renderCanvas() {
     if (item) {
       slot.innerHTML =
         '<img src="img/' + item.file + '" alt="' + esc(item.label) + '">' +
-        '<div class="tag">' + fam + '・' + esc(item.label) + '</div>' +
+        '<div class="tag">' + item.family + '・' + esc(item.label) + '</div>' +
         '<button class="rm" title="移除">✕</button>';
       slot.querySelector('.rm').addEventListener('click', function (idx) {
         return function () { removeSlot(idx); };
       }(i));
     } else {
-      slot.innerHTML = '<div class="hint"><span class="icon">➕</span>拖曳 ' + fam + ' 系列圖片<br>到這裡</div>';
+      slot.innerHTML = '<div class="hint"><span class="icon">➕</span>拖曳 ' + groupLabel + ' 系列圖片<br>到這裡</div>';
     }
 
     (function (idx) {
@@ -812,7 +993,7 @@ function renderCanvas() {
         var data = e.dataTransfer.getData('application/json');
         if (!data) return;
         var dropped = JSON.parse(data);
-        if (dropped.family !== fam && dropped.family !== 'F') { return; }
+        if (groupOf(dropped.family) !== g) { return; } /* 群組不符（不可混搭），擋掉 */
         placeImage(dropped, idx);
       });
       slot.addEventListener('click', function () {
@@ -827,10 +1008,13 @@ function renderCanvas() {
   stage.appendChild(rowEl);
 
   var filledCount = state.slots.filter(Boolean).length;
+  var usedFams = state.slots.filter(Boolean).map(function (s) { return s.family; })
+    .filter(function (v, idx, arr) { return arr.indexOf(v) === idx; });
   var totalW = n * w + (n - 1) * 14;
   info.innerHTML =
-    '<span>系列：<b>' + fam + '</b></span>' +
-    '<span>單格尺寸：<b>' + w + '×' + FAMILIES[fam].height + '</b></span>' +
+    '<span>群組：<b>' + groupLabel + '</b>' + (GROUPS[g].families.length > 1 ? '（可混搭）' : '（不可混搭）') + '</span>' +
+    '<span>目前用到：<b>' + (usedFams.length ? usedFams.join('、') : '－') + '</b></span>' +
+    '<span>單格尺寸：<b>' + w + '×' + FAMILIES[GROUPS[g].families[0]].height + '</b></span>' +
     '<span>已放：<b>' + filledCount + ' / ' + n + '</b></span>' +
     '<span>整排寬度：<b>' + totalW + 'px</b>' + (totalW > 1200 ? ' ⚠ 超過1200' : '') + '</span>';
 }
@@ -841,10 +1025,75 @@ function renderCanvas() {
 document.getElementById('btn-clear').addEventListener('click', clearCanvas);
 
 /* ════════════════════════════════════════
+   編輯權限鎖：鑰匙圖示 → 4碼密碼 → 解鎖後才能改名
+════════════════════════════════════════ */
+var lockFab = document.getElementById('lock-fab');
+var pinOverlay = document.getElementById('pin-overlay');
+var pinInput = document.getElementById('pin-input');
+var pinError = document.getElementById('pin-error');
+var editBanner = document.getElementById('edit-banner');
+
+function pulseLock() {
+  lockFab.classList.remove('pulse');
+  void lockFab.offsetWidth; /* 重觸發動畫 */
+  lockFab.classList.add('pulse');
+}
+
+function updateLockUI() {
+  lockFab.textContent = unlocked ? '🔓' : '🔒';
+  lockFab.classList.toggle('unlocked', unlocked);
+  editBanner.classList.toggle('show', unlocked);
+}
+
+function openPin() {
+  pinInput.value = '';
+  pinError.classList.remove('show');
+  pinOverlay.classList.add('show');
+  setTimeout(function () { pinInput.focus(); }, 50);
+}
+function closePin() { pinOverlay.classList.remove('show'); }
+
+function trySubmitPin() {
+  if (pinInput.value === EDIT_PIN) {
+    unlocked = true;
+    try { sessionStorage.setItem(UNLOCK_KEY, '1'); } catch (e) {}
+    closePin();
+    updateLockUI();
+    renderPalette();
+  } else {
+    pinError.classList.add('show');
+    pinInput.value = '';
+    pinInput.focus();
+  }
+}
+
+lockFab.addEventListener('click', function () {
+  if (unlocked) { openRelockConfirm(); } else { openPin(); }
+});
+function openRelockConfirm() { relock(); }
+function relock() {
+  unlocked = false;
+  try { sessionStorage.removeItem(UNLOCK_KEY); } catch (e) {}
+  updateLockUI();
+  renderPalette();
+}
+
+document.getElementById('pin-cancel').addEventListener('click', closePin);
+document.getElementById('pin-submit').addEventListener('click', trySubmitPin);
+pinInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') trySubmitPin(); });
+pinOverlay.addEventListener('click', function (e) { if (e.target === pinOverlay) closePin(); });
+
+document.getElementById('btn-relock').addEventListener('click', relock);
+document.getElementById('btn-export-config').addEventListener('click', exportConfig);
+
+/* ════════════════════════════════════════
    初始化
 ════════════════════════════════════════ */
+updateLockUI();
 renderPalette();
 renderCanvas();
+loadRemoteConfig(function () { renderPalette(); }); /* 讀 config.json（file:// 或檔案不存在時安靜失敗，不影響其他功能） */
 </script>
+
 </body>
 </html>
