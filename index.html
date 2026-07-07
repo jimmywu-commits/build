@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>版位排版工具</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#f4f6f5;--panel:#ffffff;--border:#dde3e1;--border-strong:#c3cdc9;
+  --teal:#4d9b95;--teal-dark:#357872;--teal-tint:#e6f2f0;
+  --ink:#1f2b29;--ink2:#5b6a67;--ink3:#93a19d;
+  --danger:#d4392e;--radius:10px;--radius-sm:6px;
+  --shadow:0 1px 3px rgba(20,40,35,.08);--shadow-md:0 6px 20px rgba(20,40,35,.12);
+}
+html,body{height:100%;background:var(--bg);color:var(--ink);
+  font-family:"PingFang TC","Microsoft JhengHei","Segoe UI",Arial,sans-serif;font-size:14px;}
+#app{display:flex;height:100vh;}
+
+/* ══════════════ 左：素材庫 ══════════════ */
+#palette{width:340px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden;}
+#palette-head{padding:18px 18px 14px;border-bottom:1px solid var(--border);}
+#palette-head h1{font-size:15px;font-weight:800;letter-spacing:.3px;}
+#palette-head p{font-size:11.5px;color:var(--ink2);margin-top:5px;line-height:1.6;}
+#palette-scroll{flex:1;overflow-y:auto;padding:10px 14px 24px;}
+
+.fam-section{margin-bottom:6px;border-bottom:1px solid var(--border);}
+.fam-head{display:flex;align-items:center;gap:8px;padding:12px 4px;cursor:pointer;user-select:none;}
+.fam-head .fam-badge{width:26px;height:26px;border-radius:7px;background:var(--teal);color:#fff;
+  font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.fam-head .fam-meta{flex:1;min-width:0;}
+.fam-head .fam-meta .t1{font-weight:700;font-size:12.5px;}
+.fam-head .fam-meta .t2{font-size:10.5px;color:var(--ink3);margin-top:1px;}
+.fam-head .fam-caret{font-size:10px;color:var(--ink3);transition:transform .15s;}
+.fam-section.open .fam-caret{transform:rotate(90deg);}
+.fam-section.disabled .fam-head{opacity:.4;}
+.fam-section.disabled .fam-grid{opacity:.35;pointer-events:none;filter:grayscale(1);}
+.fam-section.active .fam-badge{box-shadow:0 0 0 3px var(--teal-tint);}
+
+.fam-grid{display:none;grid-template-columns:1fr 1fr;gap:8px;padding:2px 4px 14px;}
+.fam-section.open .fam-grid{display:grid;}
+.thumb{border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;cursor:grab;
+  background:#fafcfb;transition:border-color .12s,box-shadow .12s;position:relative;}
+.thumb:hover{border-color:var(--teal);box-shadow:var(--shadow);}
+.thumb.selected{border-color:var(--teal-dark);box-shadow:0 0 0 2px var(--teal-tint);}
+.thumb img{width:100%;display:block;aspect-ratio:var(--ar,8/7);object-fit:cover;background:#eee;}
+.thumb .cap{font-size:9.5px;color:var(--ink2);padding:3px 5px;text-align:center;}
+
+/* ══════════════ 右：畫布 ══════════════ */
+#canvas-area{flex:1;overflow:auto;padding:28px 32px;display:flex;flex-direction:column;gap:16px;}
+#toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+#toolbar h2{font-size:15px;font-weight:800;margin-right:auto;}
+.btn{padding:8px 16px;border-radius:var(--radius-sm);border:1px solid var(--border-strong);
+  background:#fff;color:var(--ink);font-size:12.5px;font-weight:700;cursor:pointer;transition:.12s;}
+.btn:hover{border-color:var(--teal);color:var(--teal-dark);}
+.btn.primary{background:var(--teal);border-color:var(--teal);color:#fff;}
+.btn.primary:hover{background:var(--teal-dark);border-color:var(--teal-dark);}
+.btn:disabled{opacity:.4;cursor:not-allowed;pointer-events:none;}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--ink2);}
+
+#canvas-info{font-size:12px;color:var(--ink2);display:flex;gap:18px;flex-wrap:wrap;}
+#canvas-info b{color:var(--ink);}
+
+#stage{background:#fff;border:1px solid var(--border);border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:24px;width:fit-content;max-width:100%;overflow-x:auto;}
+#row{display:flex;gap:0;position:relative;}
+
+.slot{position:relative;height:350px;flex-shrink:0;border:2px dashed var(--border-strong);
+  display:flex;align-items:center;justify-content:center;background:#fbfcfc;
+  transition:border-color .12s,background .12s;overflow:hidden;}
+.slot + .slot{margin-left:14px;}
+.slot.dragover-ok{border-color:var(--teal);background:var(--teal-tint);}
+.slot.dragover-bad{border-color:var(--danger);background:#fbeceb;}
+.slot .hint{font-size:12px;color:var(--ink3);text-align:center;padding:0 10px;line-height:1.7;}
+.slot .hint .icon{font-size:22px;display:block;margin-bottom:6px;}
+.slot img{width:100%;height:100%;object-fit:cover;display:block;}
+.slot .tag{position:absolute;left:6px;top:6px;background:rgba(20,40,35,.72);color:#fff;
+  font-size:10px;padding:2px 7px;border-radius:4px;}
+.slot .rm{position:absolute;right:6px;top:6px;width:22px;height:22px;border-radius:50%;
+  background:rgba(20,40,35,.72);color:#fff;border:none;font-size:13px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;line-height:1;}
+.slot .rm:hover{background:var(--danger);}
+
+#empty-drop{width:1200px;max-width:100%;height:350px;border:2px dashed var(--border-strong);
+  border-radius:var(--radius);display:flex;align-items:center;justify-content:center;
+  background:#fbfcfc;transition:.12s;}
+#empty-drop.dragover-ok{border-color:var(--teal);background:var(--teal-tint);}
+#empty-drop .hint{text-align:center;color:var(--ink3);}
+#empty-drop .hint .icon{font-size:36px;display:block;margin-bottom:10px;}
+#empty-drop .hint b{color:var(--ink2);font-size:13px;display:block;margin-bottom:4px;}
+
+#footnote{font-size:11px;color:var(--ink3);line-height:1.7;max-width:760px;}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div id="palette">
+    <div id="palette-head">
+      <h1>🧩 素材庫</h1>
+      <p>把圖片拖到右邊畫布上排版。同一排只能放同一系列的圖，選了別的系列會自動反灰。</p>
+    </div>
+    <div id="palette-scroll"></div>
+  </div>
+
+  <div id="canvas-area">
+    <div id="toolbar">
+      <h2>版位畫布</h2>
+      <button class="btn ghost" id="btn-clear">🗑 清空畫布</button>
+      <button class="btn" id="btn-json" disabled title="下一階段開發：需先提供欄位對照表">⬇ 下載 JSON</button>
+      <button class="btn primary" id="btn-xlsx" disabled title="下一階段開發：需先提供欄位對照表">⬇ 下載試算表</button>
+    </div>
+    <div id="canvas-info"></div>
+    <div id="stage"><div id="row"></div></div>
+    <div id="footnote">
+      本機暫存已開啟：排版內容會自動存在這台瀏覽器裡，重新整理頁面不會消失。「下載 JSON／試算表」等你提供欄位對照表（exl 資料夾的表格）之後再串。
+    </div>
+  </div>
+
+</div>
+
+<script id="wo-manifest" type="application/json">
+{
+  "canvasWidth": 1200,
+  "rowHeight": 350,
+  "families": {
+    "A": {
+      "width": 400,
+      "height": 350,
+      "maxPerRow": 3,
+      "items": [
+        {
+          "variant": 1,
+          "combo": 1,
+          "file": "副區-A-1-1.jpg",
+          "label": "款式 1-1"
+        },
+        {
+          "variant": 1,
+          "combo": 2,
+          "file": "副區-A-1-2.jpg",
+          "label": "款式 1-2"
+        },
+        {
+          "variant": 1,
+          "combo": 3,
+          "file": "副區-A-1-3.jpg",
+          "label": "款式 1-3"
+        },
+        {
+          "variant": 1,
+          "combo": 4,
+          "file": "副區-A-1-4.jpg",
+          "label": "款式 1-4"
+        },
+        {
+          "variant": 2,
+          "combo": 1,
+          "file": "副區-A-2-1.jpg",
+          "label": "款式 2-1"
+        },
+        {
+          "variant": 2,
+          "combo": 2,
+          "file": "副區-A-2-2.jpg",
+          "label": "款式 2-2"
+        },
+        {
+          "variant": 2,
+          "combo": 3,
+          "file": "副區-A-2-3.jpg",
+          "label": "款式 2-3"
+        },
+        {
+          "variant": 2,
+          "combo": 4,
+          "file": "副區-A-2-4.jpg",
+          "label": "款式 2-4"
+        },
+        {
+          "variant": 3,
+          "combo": 1,
+          "file": "副區-A-3-1.jpg",
+          "label": "款式 3-1"
+        },
+        {
+          "variant": 3,
+          "combo": 2,
+          "file": "副區-A-3-2.jpg",
+          "label": "款式 3-2"
+        },
+        {
+          "variant": 3,
+          "combo": 3,
+          "file": "副區-A-3-3.jpg",
+          "label": "款式 3-3"
+        },
+        {
+          "variant": 3,
+          "combo": 4,
+          "file": "副區-A-3-4.jpg",
+          "label": "款式 3-4"
+        },
+        {
+          "variant": 4,
+          "combo": 1,
+          "file": "副區-A-4-1.jpg",
+          "label": "款式 4-1"
+        },
+        {
+          "variant": 4,
+          "combo": 2,
+          "file": "副區-A-4-2.jpg",
+          "label": "款式 4-2"
+        },
+        {
+          "variant": 4,
+          "combo": 3,
+          "file": "副區-A-4-3.jpg",
+          "label": "款式 4-3"
+        },
+        {
+          "variant": 4,
+          "combo": 4,
+          "file": "副區-A-4-4.jpg",
+          "label": "款式 4-4"
+        },
+        {
+          "variant": 5,
+          "combo": 1,
+          "file": "副區-A-5-1.jpg",
+          "label": "款式 5-1"
+        },
+        {
+          "variant": 5,
+          "combo": 2,
+          "file": "副區-A-5-2.jpg",
+          "label": "款式 5-2"
+        },
+        {
+          "variant": 5,
+          "combo": 3,
+          "file": "副區-A-5-3.jpg",
+          "label": "款式 5-3"
+        }
+      ]
+    },
+    "B": {
+      "width": 400,
+      "height": 350,
+      "maxPerRow": 3,
+      "items": [
+        {
+          "variant": 1,
+          "combo": 1,
+          "file": "副區-B-1-1.jpg",
+          "label": "款式 1-1"
+        },
+        {
+          "variant": 1,
+          "combo": 2,
+          "file": "副區-B-1-2.jpg",
+          "label": "款式 1-2"
+        },
+        {
+          "variant": 1,
+          "combo": 3,
+          "file": "副區-B-1-3.jpg",
+          "label": "款式 1-3"
+        },
+        {
+          "variant": 1,
+          "combo": 4,
+          "file": "副區-B-1-4.jpg",
+          "label": "款式 1-4"
+        },
+        {
+          "variant": 2,
+          "combo": 1,
+          "file": "副區-B-2-1.jpg",
+          "label": "款式 2-1"
+        },
+        {
+          "variant": 2,
+          "combo": 2,
+          "file": "副區-B-2-2.jpg",
+          "label": "款式 2-2"
+        },
+        {
+          "variant": 2,
+          "combo": 3,
+          "file": "副區-B-2-3.jpg",
+          "label": "款式 2-3"
+        },
+        {
+          "variant": 2,
+          "combo": 4,
+          "file": "副區-B-2-4.jpg",
+          "label": "款式 2-4"
+        },
+        {
+          "variant": 3,
+          "combo": 1,
+          "file": "副區-B-3-1.jpg",
+          "label": "款式 3-1"
+        },
+        {
+          "variant": 3,
+          "combo": 2,
+          "file": "副區-B-3-2.jpg",
+          "label": "款式 3-2"
+        },
+        {
+          "variant": 3,
+          "combo": 3,
+          "file": "副區-B-3-3.jpg",
+          "label": "款式 3-3"
+        },
+        {
+          "variant": 3,
+          "combo": 4,
+          "file": "副區-B-3-4.jpg",
+          "label": "款式 3-4"
+        },
+        {
+          "variant": 4,
+          "combo": 1,
+          "file": "副區-B-4-1.jpg",
+          "label": "款式 4-1"
+        },
+        {
+          "variant": 4,
+          "combo": 2,
+          "file": "副區-B-4-2.jpg",
+          "label": "款式 4-2"
+        },
+        {
+          "variant": 4,
+          "combo": 3,
+          "file": "副區-B-4-3.jpg",
+          "label": "款式 4-3"
+        },
+        {
+          "variant": 4,
+          "combo": 4,
+          "file": "副區-B-4-4.jpg",
+          "label": "款式 4-4"
+        },
+        {
+          "variant": 5,
+          "combo": 1,
+          "file": "副區-B-5-1.jpg",
+          "label": "款式 5-1"
+        },
+        {
+          "variant": 5,
+          "combo": 2,
+          "file": "副區-B-5-2.jpg",
+          "label": "款式 5-2"
+        },
+        {
+          "variant": 5,
+          "combo": 3,
+          "file": "副區-B-5-3.jpg",
+          "label": "款式 5-3"
+        },
+        {
+          "variant": 5,
+          "combo": 4,
+          "file": "副區-B-5-4.jpg",
+          "label": "款式 5-4"
+        }
+      ]
+    },
+    "C": {
+      "width": 600,
+      "height": 350,
+      "maxPerRow": 2,
+      "items": [
+        {
+          "variant": 1,
+          "combo": 1,
+          "file": "副區-C-1-1.jpg",
+          "label": "款式 1-1"
+        },
+        {
+          "variant": 1,
+          "combo": 2,
+          "file": "副區-C-1-2.jpg",
+          "label": "款式 1-2"
+        },
+        {
+          "variant": 1,
+          "combo": 3,
+          "file": "副區-C-1-3.jpg",
+          "label": "款式 1-3"
+        },
+        {
+          "variant": 2,
+          "combo": 1,
+          "file": "副區-C-2-1.jpg",
+          "label": "款式 2-1"
+        },
+        {
+          "variant": 2,
+          "combo": 2,
+          "file": "副區-C-2-2.jpg",
+          "label": "款式 2-2"
+        },
+        {
+          "variant": 2,
+          "combo": 3,
+          "file": "副區-C-2-3.jpg",
+          "label": "款式 2-3"
+        },
+        {
+          "variant": 3,
+          "combo": 1,
+          "file": "副區-C-3-1.jpg",
+          "label": "款式 3-1"
+        },
+        {
+          "variant": 3,
+          "combo": 2,
+          "file": "副區-C-3-2.jpg",
+          "label": "款式 3-2"
+        },
+        {
+          "variant": 3,
+          "combo": 3,
+          "file": "副區-C-3-3.jpg",
+          "label": "款式 3-3"
+        },
+        {
+          "variant": 4,
+          "combo": 1,
+          "file": "副區-C-4-1.jpg",
+          "label": "款式 4-1"
+        },
+        {
+          "variant": 4,
+          "combo": 2,
+          "file": "副區-C-4-2.jpg",
+          "label": "款式 4-2"
+        },
+        {
+          "variant": 4,
+          "combo": 3,
+          "file": "副區-C-4-3.jpg",
+          "label": "款式 4-3"
+        },
+        {
+          "variant": 4,
+          "combo": 4,
+          "file": "副區-C-4-4.jpg",
+          "label": "款式 4-4"
+        }
+      ]
+    },
+    "D": {
+      "width": 600,
+      "height": 350,
+      "maxPerRow": 2,
+      "items": [
+        {
+          "variant": 1,
+          "combo": 1,
+          "file": "副區-D-1-1.jpg",
+          "label": "款式 1-1"
+        },
+        {
+          "variant": 1,
+          "combo": 2,
+          "file": "副區-D-1-2.jpg",
+          "label": "款式 1-2"
+        },
+        {
+          "variant": 1,
+          "combo": 3,
+          "file": "副區-D-1-3.jpg",
+          "label": "款式 1-3"
+        },
+        {
+          "variant": 2,
+          "combo": 1,
+          "file": "副區-D-2-1.jpg",
+          "label": "款式 2-1"
+        },
+        {
+          "variant": 2,
+          "combo": 2,
+          "file": "副區-D-2-2.jpg",
+          "label": "款式 2-2"
+        },
+        {
+          "variant": 2,
+          "combo": 3,
+          "file": "副區-D-2-3.jpg",
+          "label": "款式 2-3"
+        },
+        {
+          "variant": 3,
+          "combo": 1,
+          "file": "副區-D-3-1.jpg",
+          "label": "款式 3-1"
+        },
+        {
+          "variant": 3,
+          "combo": 2,
+          "file": "副區-D-3-2.jpg",
+          "label": "款式 3-2"
+        },
+        {
+          "variant": 3,
+          "combo": 3,
+          "file": "副區-D-3-3.jpg",
+          "label": "款式 3-3"
+        },
+        {
+          "variant": 4,
+          "combo": 1,
+          "file": "副區-D-4-1.jpg",
+          "label": "款式 4-1"
+        },
+        {
+          "variant": 4,
+          "combo": 2,
+          "file": "副區-D-4-2.jpg",
+          "label": "款式 4-2"
+        },
+        {
+          "variant": 4,
+          "combo": 3,
+          "file": "副區-D-4-3.jpg",
+          "label": "款式 4-3"
+        },
+        {
+          "variant": 4,
+          "combo": 4,
+          "file": "副區-D-4-4.jpg",
+          "label": "款式 4-4"
+        }
+      ]
+    },
+    "E": {
+      "width": 600,
+      "height": 350,
+      "maxPerRow": 2,
+      "items": [
+        {
+          "variant": 1,
+          "combo": 1,
+          "file": "副區-E-1-1.jpg",
+          "label": "款式 1-1"
+        },
+        {
+          "variant": 1,
+          "combo": 2,
+          "file": "副區-E-1-2.jpg",
+          "label": "款式 1-2"
+        },
+        {
+          "variant": 1,
+          "combo": 3,
+          "file": "副區-E-1-3.jpg",
+          "label": "款式 1-3"
+        },
+        {
+          "variant": 2,
+          "combo": 1,
+          "file": "副區-E-2-1.jpg",
+          "label": "款式 2-1"
+        },
+        {
+          "variant": 2,
+          "combo": 2,
+          "file": "副區-E-2-2.jpg",
+          "label": "款式 2-2"
+        },
+        {
+          "variant": 2,
+          "combo": 3,
+          "file": "副區-E-2-3.jpg",
+          "label": "款式 2-3"
+        }
+      ]
+    },
+    "F": {
+      "width": 300,
+      "height": 350,
+      "maxPerRow": 4,
+      "items": [
+        {
+          "variant": 1,
+          "combo": 1,
+          "file": "副區-F-1-1.jpg",
+          "label": "款式 1-1"
+        }
+      ]
+    }
+  }
+}
+</script>
+
+<script>
+/* ════════════════════════════════════════
+   資料
+════════════════════════════════════════ */
+var MANIFEST = JSON.parse(document.getElementById('wo-manifest').textContent);
+var FAMILIES = MANIFEST.families;
+var FAM_KEYS = Object.keys(FAMILIES).sort();
+var STORAGE_KEY = 'wo_canvas_state_v1';
+
+/* state.family: null 或 'A'~'F'
+   state.slots: 陣列，長度依家族 maxPerRow 決定，每格是 {family,file,variant,combo,label} 或 null */
+var state = loadState() || { family: null, slots: [null, null, null, null] };
+var selectedThumb = null; /* 點選模式：{family,file,variant,combo,label} */
+
+function loadState() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)); }
+  catch (e) { return null; }
+}
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  catch (e) { /* 存不了就算了，不影響操作 */ }
+}
+
+function maxPerRow(fam) { return FAMILIES[fam] ? FAMILIES[fam].maxPerRow : 4; }
+function famWidth(fam) { return FAMILIES[fam] ? FAMILIES[fam].width : 300; }
+
+/* ════════════════════════════════════════
+   左側素材庫渲染
+════════════════════════════════════════ */
+function renderPalette() {
+  var wrap = document.getElementById('palette-scroll');
+  wrap.innerHTML = FAM_KEYS.map(function (fam) {
+    var f = FAMILIES[fam];
+    var isActive = state.family === fam;
+    var isDisabled = state.family !== null && state.family !== fam;
+    var thumbs = f.items.map(function (item) {
+      var isSel = selectedThumb && selectedThumb.family === fam && selectedThumb.file === item.file;
+      return '<div class="thumb' + (isSel ? ' selected' : '') + '" draggable="true" ' +
+        'data-fam="' + fam + '" data-file="' + item.file + '" data-variant="' + item.variant + '" data-combo="' + item.combo + '" data-label="' + esc(item.label) + '" ' +
+        'style="--ar:' + f.width + '/' + f.height + '">' +
+        '<img src="img/' + item.file + '" loading="lazy" alt="' + esc(item.label) + '">' +
+        '<div class="cap">' + esc(item.label) + '</div>' +
+      '</div>';
+    }).join('');
+    return '<div class="fam-section' + (isActive ? ' open active' : '') + (isDisabled ? ' disabled' : '') + '" data-fam="' + fam + '">' +
+      '<div class="fam-head">' +
+        '<div class="fam-badge">' + fam + '</div>' +
+        '<div class="fam-meta"><div class="t1">系列 ' + fam + '</div>' +
+        '<div class="t2">' + f.width + '×' + f.height + '　每排最多 ' + f.maxPerRow + ' 個</div></div>' +
+        '<div class="fam-caret">▶</div>' +
+      '</div>' +
+      '<div class="fam-grid">' + thumbs + '</div>' +
+    '</div>';
+  }).join('');
+
+  /* 手風琴展開/收合 */
+  wrap.querySelectorAll('.fam-head').forEach(function (head) {
+    head.addEventListener('click', function () {
+      var section = head.closest('.fam-section');
+      if (section.classList.contains('disabled')) return;
+      var willOpen = !section.classList.contains('open');
+      wrap.querySelectorAll('.fam-section').forEach(function (s) { s.classList.remove('open'); });
+      if (willOpen) section.classList.add('open');
+    });
+  });
+
+  /* 縮圖：拖曳 + 點選 */
+  wrap.querySelectorAll('.thumb').forEach(function (el) {
+    var info = {
+      family: el.getAttribute('data-fam'),
+      file: el.getAttribute('data-file'),
+      variant: +el.getAttribute('data-variant'),
+      combo: +el.getAttribute('data-combo'),
+      label: el.getAttribute('data-label')
+    };
+    el.addEventListener('dragstart', function (e) {
+      e.dataTransfer.setData('application/json', JSON.stringify(info));
+      e.dataTransfer.effectAllowed = 'copy';
+    });
+    el.addEventListener('click', function () {
+      if (el.closest('.fam-section').classList.contains('disabled')) return;
+      selectedThumb = (selectedThumb && selectedThumb.file === info.file) ? null : info;
+      renderPalette();
+    });
+  });
+}
+
+function esc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+/* ════════════════════════════════════════
+   放置一張圖到畫布（統一入口：拖曳跟點選都走這裡）
+════════════════════════════════════════ */
+function placeImage(info, slotIndex) {
+  if (info.family === 'F') {
+    /* F 系列特殊規則：選了就直接把 4 格全部套上同一張圖，其餘系列反灰 */
+    state.family = 'F';
+    var n = maxPerRow('F');
+    state.slots = [];
+    for (var i = 0; i < n; i++) state.slots.push(Object.assign({}, info));
+    finishPlacement();
+    return;
+  }
+
+  if (state.family === null) {
+    state.family = info.family;
+    state.slots = new Array(maxPerRow(info.family)).fill(null);
+    slotIndex = (slotIndex == null) ? 0 : slotIndex;
+  }
+  if (info.family !== state.family) return; /* 系列不符，不放 */
+  if (slotIndex == null) {
+    /* 點選模式沒有指定格子：放進第一個空格 */
+    slotIndex = state.slots.findIndex(function (s) { return !s; });
+    if (slotIndex === -1) slotIndex = 0;
+  }
+  state.slots[slotIndex] = Object.assign({}, info);
+  finishPlacement();
+}
+
+function finishPlacement() {
+  selectedThumb = null;
+  saveState();
+  renderPalette();
+  renderCanvas();
+}
+
+function removeSlot(idx) {
+  state.slots[idx] = null;
+  if (state.slots.every(function (s) { return !s; })) {
+    state.family = null;
+    state.slots = [null, null, null, null];
+  }
+  saveState();
+  renderPalette();
+  renderCanvas();
+}
+
+function clearCanvas() {
+  state.family = null;
+  state.slots = [null, null, null, null];
+  selectedThumb = null;
+  saveState();
+  renderPalette();
+  renderCanvas();
+}
+
+/* ════════════════════════════════════════
+   畫布渲染
+════════════════════════════════════════ */
+function renderCanvas() {
+  var stage = document.getElementById('stage');
+  var info = document.getElementById('canvas-info');
+
+  if (state.family === null) {
+    stage.innerHTML =
+      '<div id="empty-drop">' +
+        '<div class="hint"><span class="icon">🗳️</span><b>把任意一張圖拖到這裡開始排版</b>' +
+        '選第一張圖之後，畫布會依照那個系列自動決定可以放幾格</div>' +
+      '</div>';
+    var dz = document.getElementById('empty-drop');
+    dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('dragover-ok'); });
+    dz.addEventListener('dragleave', function () { dz.classList.remove('dragover-ok'); });
+    dz.addEventListener('drop', function (e) {
+      e.preventDefault(); dz.classList.remove('dragover-ok');
+      var data = e.dataTransfer.getData('application/json');
+      if (!data) return;
+      placeImage(JSON.parse(data), 0);
+    });
+    info.innerHTML = '<span>尚未選擇系列，畫布是空的</span>';
+    return;
+  }
+
+  var fam = state.family, w = famWidth(fam), n = maxPerRow(fam);
+  var rowEl = document.createElement('div');
+  rowEl.id = 'row';
+
+  for (var i = 0; i < n; i++) {
+    var item = state.slots[i];
+    var slot = document.createElement('div');
+    slot.className = 'slot';
+    slot.style.width = w + 'px';
+
+    if (item) {
+      slot.innerHTML =
+        '<img src="img/' + item.file + '" alt="' + esc(item.label) + '">' +
+        '<div class="tag">' + fam + '・' + esc(item.label) + '</div>' +
+        '<button class="rm" title="移除">✕</button>';
+      slot.querySelector('.rm').addEventListener('click', function (idx) {
+        return function () { removeSlot(idx); };
+      }(i));
+    } else {
+      slot.innerHTML = '<div class="hint"><span class="icon">➕</span>拖曳 ' + fam + ' 系列圖片<br>到這裡</div>';
+    }
+
+    (function (idx) {
+      slot.addEventListener('dragover', function (e) {
+        e.preventDefault();
+        slot.classList.add('dragover-ok');
+      });
+      slot.addEventListener('dragleave', function () {
+        slot.classList.remove('dragover-ok', 'dragover-bad');
+      });
+      slot.addEventListener('drop', function (e) {
+        e.preventDefault();
+        slot.classList.remove('dragover-ok', 'dragover-bad');
+        var data = e.dataTransfer.getData('application/json');
+        if (!data) return;
+        var dropped = JSON.parse(data);
+        if (dropped.family !== fam && dropped.family !== 'F') { return; }
+        placeImage(dropped, idx);
+      });
+      slot.addEventListener('click', function () {
+        if (selectedThumb) placeImage(selectedThumb, idx);
+      });
+    })(i);
+
+    rowEl.appendChild(slot);
+  }
+
+  stage.innerHTML = '';
+  stage.appendChild(rowEl);
+
+  var filledCount = state.slots.filter(Boolean).length;
+  var totalW = n * w + (n - 1) * 14;
+  info.innerHTML =
+    '<span>系列：<b>' + fam + '</b></span>' +
+    '<span>單格尺寸：<b>' + w + '×' + FAMILIES[fam].height + '</b></span>' +
+    '<span>已放：<b>' + filledCount + ' / ' + n + '</b></span>' +
+    '<span>整排寬度：<b>' + totalW + 'px</b>' + (totalW > 1200 ? ' ⚠ 超過1200' : '') + '</span>';
+}
+
+/* ════════════════════════════════════════
+   工具列
+════════════════════════════════════════ */
+document.getElementById('btn-clear').addEventListener('click', clearCanvas);
+
+/* ════════════════════════════════════════
+   初始化
+════════════════════════════════════════ */
+renderPalette();
+renderCanvas();
+</script>
+</body>
+</html>
