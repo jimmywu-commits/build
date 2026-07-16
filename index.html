@@ -4131,7 +4131,34 @@ document.getElementById('btn-export-config').addEventListener('click', exportCon
 /* ════════════════════════════════════════
    頁面切換：首頁 / 工單生成器 / 匯入工單
 ════════════════════════════════════════ */
-function showView(name) {
+var VIEW_STORAGE_KEY = 'wo_last_view';
+var VALID_VIEWS = ['home', 'generator', 'import'];
+
+function isValidView(name) {
+  return VALID_VIEWS.indexOf(name) !== -1 && !!document.getElementById('view-' + name);
+}
+
+function getSavedView() {
+  var hashView = String(window.location.hash || '').replace(/^#/, '');
+  if (isValidView(hashView)) return hashView;
+
+  try {
+    var localView = localStorage.getItem(VIEW_STORAGE_KEY);
+    if (isValidView(localView)) return localView;
+  } catch (e) {}
+
+  try {
+    var sessionView = sessionStorage.getItem(VIEW_STORAGE_KEY);
+    if (isValidView(sessionView)) return sessionView;
+  } catch (e) {}
+
+  return 'home';
+}
+
+function showView(name, options) {
+  options = options || {};
+  if (!isValidView(name)) name = 'home';
+
   document.querySelectorAll('.view').forEach(function (v) { v.classList.toggle('active', v.id === 'view-' + name); });
   document.querySelectorAll('.nav-item').forEach(function (b) { b.classList.toggle('active', b.getAttribute('data-view') === name); });
   /* 鎖頭跟編輯提示條只跟「工單生成器」有關，其他頁面藏起來 */
@@ -4139,7 +4166,15 @@ function showView(name) {
   lockFab.style.display = showLock ? '' : 'none';
   if (!showLock) editBanner.classList.remove('show');
   else editBanner.classList.toggle('show', unlocked);
-  try { sessionStorage.setItem('wo_last_view', name); } catch (e) {}
+
+  try { localStorage.setItem(VIEW_STORAGE_KEY, name); } catch (e) {}
+  try { sessionStorage.setItem(VIEW_STORAGE_KEY, name); } catch (e) {}
+
+  /* 將目前工具頁寫進網址；重新整理或網站檔案更新後仍可回到同一頁。 */
+  if (!options.skipHash && window.location.hash !== '#' + name) {
+    try { history.replaceState(null, '', '#' + name); }
+    catch (e) { window.location.hash = name; }
+  }
 }
 document.querySelectorAll('.nav-item').forEach(function (b) {
   b.addEventListener('click', function () { showView(b.getAttribute('data-view')); });
@@ -4196,7 +4231,11 @@ document.getElementById('btn-preview-all').addEventListener('click', function ()
   });
 });
 
-showView('home'); /* 每次打開都先回到首頁入口 */
+showView(getSavedView()); /* 還原上次所在工具頁，不再每次強制回首頁 */
+window.addEventListener('hashchange', function () {
+  var hashView = String(window.location.hash || '').replace(/^#/, '');
+  if (isValidView(hashView)) showView(hashView, { skipHash: true });
+});
 ensureBlocksLoaded(function () {}); /* 背景預先載入版位模板，使用者實際匯入時大多已經載好了；跟使用者觸發的載入共用同一個機制，不會重複觸發 */
 
 /* 還原上次匯入工單的本機暫存內容（不用重新上傳檔案） */
