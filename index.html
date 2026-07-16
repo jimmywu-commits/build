@@ -14,7 +14,108 @@
 }
 html,body{height:100%;background:var(--bg);color:var(--ink);
   font-family:"PingFang TC","Microsoft JhengHei","Segoe UI",Arial,sans-serif;font-size:14px;}
-#app{display:flex;height:100vh;}
+
+/* ══════════════ 外殼：左側導覽 rail + 右側內容切換 ══════════════ */
+#shell{display:flex;height:100vh;}
+#nav-rail{width:76px;flex-shrink:0;background:var(--ink);display:flex;flex-direction:column;
+  align-items:center;padding:16px 0;gap:6px;}
+#nav-rail .nav-logo{font-size:22px;margin-bottom:10px;}
+.nav-item{width:60px;background:none;border:none;color:#b9c4c1;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 2px;
+  border-radius:var(--radius-sm);transition:.12s;}
+.nav-item .ico{font-size:19px;}
+.nav-item .lbl{font-size:9.5px;line-height:1.2;text-align:center;}
+.nav-item:hover{background:rgba(255,255,255,.08);color:#fff;}
+.nav-item.active{background:var(--teal);color:#fff;}
+
+#views{flex:1;position:relative;overflow:hidden;}
+.view{display:none;height:100%;overflow:auto;}
+.view.active{display:block;}
+#view-generator.active{display:flex;}
+#app{display:flex;height:100%;width:100%;}
+
+/* ══════════════ 首頁 ══════════════ */
+#view-home.active{display:flex;align-items:center;justify-content:center;}
+#home-wrap{text-align:center;max-width:760px;padding:20px;}
+#home-head h1{font-size:24px;font-weight:800;letter-spacing:.3px;}
+#home-head p{color:var(--ink2);font-size:13px;margin-top:8px;margin-bottom:36px;}
+#home-cards{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+.home-card{background:#fff;border:1.5px solid var(--border);border-radius:16px;
+  padding:36px 24px;cursor:pointer;transition:.15s;text-align:center;}
+.home-card:hover{border-color:var(--teal);box-shadow:var(--shadow-md);transform:translateY(-3px);}
+.home-card .hc-icon{font-size:44px;margin-bottom:14px;}
+.home-card .hc-title{font-size:16px;font-weight:800;margin-bottom:6px;}
+.home-card .hc-desc{font-size:12px;color:var(--ink2);}
+
+/* ══════════════ 匯入工單（佔位頁） ══════════════ */
+/* ══════════════ 匯入工單 ══════════════ */
+#view-import.active{display:flex;}
+#import-app{display:flex;width:100%;height:100%;}
+
+#import-side{width:340px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden;}
+#import-side-head{padding:18px 18px 14px;border-bottom:1px solid var(--border);}
+#import-side-head h1{font-size:15px;font-weight:800;}
+#import-side-head p{font-size:11.5px;color:var(--ink2);margin-top:5px;line-height:1.6;}
+
+#import-drop{margin:14px;padding:26px 14px;border:2px dashed var(--border-strong);border-radius:var(--radius);
+  text-align:center;cursor:pointer;transition:.12s;flex-shrink:0;}
+#import-drop:hover,#import-drop.dragover{border-color:var(--teal);background:var(--teal-tint);}
+#import-drop .id-icon{font-size:28px;margin-bottom:8px;}
+#import-drop .id-text{font-size:12px;color:var(--ink2);}
+#import-drop .id-text b{color:var(--ink);}
+
+#import-log{margin:0 14px;font-size:11px;color:var(--ink3);line-height:1.6;}
+#import-log .err{color:var(--danger);}
+#import-log .ok{color:var(--teal-dark);}
+
+#import-fields-scroll{flex:1;overflow-y:auto;padding:6px 14px 20px;}
+.imp-col{background:var(--bg2,#f4f6f5);border:1px solid var(--border);border-radius:8px;
+  padding:10px;margin-bottom:10px;}
+.imp-col .ic-head{font-size:11.5px;font-weight:700;margin-bottom:8px;color:var(--teal-dark);}
+.field-limit{font-size:9.5px;color:var(--ink3);font-weight:400;margin-left:4px;}
+.color-field-row{display:flex;gap:6px;}
+.color-field-row input.fv-picker{flex-shrink:0;width:36px;height:30px;padding:2px;border:1px solid var(--border);border-radius:4px;cursor:pointer;}
+.color-field-row input.fv{flex:1;min-width:0;font-family:monospace;font-size:11.5px;}
+
+#import-canvas-area{flex:1;overflow:auto;padding:24px;position:relative;}
+#import-empty2{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  flex-direction:column;text-align:center;color:var(--ink3);}
+#import-empty2 .ie-icon{font-size:36px;margin-bottom:10px;}
+#import-empty2 h2{font-size:14px;font-weight:800;color:var(--ink2);margin-bottom:6px;}
+#import-empty2 p{font-size:12px;}
+#import-preview-list{display:none;flex-direction:column;gap:18px;}
+#import-preview-list.show{display:flex;}
+
+#imp-strip-wrap{background:#000;border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+#imp-strip{position:relative;transform-origin:top left;}
+.imp-slot{background:#000;}
+.imp-mount{width:100%;height:100%;}
+
+/* 圖片素材上傳區 */
+#import-img-section{margin:0 14px 10px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+#import-img-head{font-size:11.5px;font-weight:700;color:var(--ink2);margin-bottom:8px;}
+#import-img-drop{border:1.5px dashed var(--border-strong);border-radius:var(--radius-sm);
+  padding:26px 14px;text-align:center;cursor:pointer;transition:.12s;font-size:11px;color:var(--ink2);}
+#import-img-drop .id-icon{font-size:28px;margin-bottom:8px;}
+#import-img-drop:hover,#import-img-drop.dragover{border-color:var(--teal);background:var(--teal-tint);}
+#import-img-gallery{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;max-height:160px;overflow-y:auto;}
+#import-img-gallery .im-empty{font-size:11px;color:var(--ink3);}
+.im-thumb{position:relative;width:64px;}
+.im-thumb img{width:64px;height:64px;object-fit:cover;border-radius:6px;border:1px solid var(--border);display:block;}
+.im-thumb .im-rm{position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;
+  background:var(--danger);color:#fff;border:none;font-size:10px;cursor:pointer;line-height:1;}
+.im-thumb .im-name{font-size:9px;color:var(--ink3);text-align:center;margin-top:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+.img-field-row{display:flex;gap:6px;position:relative;flex-wrap:wrap;}
+.img-field-row select.img-pick{flex-shrink:0;max-width:110px;font-size:11px;border:1px solid var(--border);
+  border-radius:4px;background:#fff;color:var(--ink2);}
+.img-field-row input.fv{flex:1;min-width:0;}
+.img-edit-btn{flex-shrink:0;width:26px;height:26px;border:1px solid var(--border);border-radius:6px;
+  background:#fff;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;
+  padding:0;line-height:1;}
+.img-edit-btn:hover{border-color:var(--teal);background:var(--teal-tint);}
 
 /* ══════════════ 左：素材庫 ══════════════ */
 #palette{width:340px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--border);
@@ -80,7 +181,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
 .slot{position:relative;height:350px;flex-shrink:0;border:2px dashed var(--border-strong);
   display:flex;align-items:center;justify-content:center;background:#fbfcfc;
   transition:border-color .12s,background .12s;overflow:hidden;}
-.slot + .slot{margin-left:14px;}
+.slot + .slot{margin-left:0;}
 .slot.dragover-ok{border-color:var(--teal);background:var(--teal-tint);}
 .slot.dragover-bad{border-color:var(--danger);background:#fbeceb;}
 .slot .hint{font-size:12px;color:var(--ink3);text-align:center;padding:0 10px;line-height:1.7;}
@@ -141,28 +242,116 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
 </style>
 </head>
 <body>
-<div id="app">
+<div id="shell">
 
-  <div id="palette">
-    <div id="palette-head">
-      <h1>🧩 素材庫</h1>
-      <p>把圖片拖到右邊畫布上排版。同一排只能放同一系列的圖，選了別的系列會自動反灰。</p>
-    </div>
-    <div id="palette-scroll"></div>
-  </div>
+  <nav id="nav-rail">
+    <div class="nav-logo">🧱</div>
+    <button class="nav-item" data-view="home" title="首頁">
+      <span class="ico">🏠</span><span class="lbl">首頁</span>
+    </button>
+    <button class="nav-item" data-view="generator" title="工單生成器">
+      <span class="ico">🧩</span><span class="lbl">工單生成器</span>
+    </button>
+    <button class="nav-item" data-view="import" title="匯入工單">
+      <span class="ico">📥</span><span class="lbl">匯入工單</span>
+    </button>
+  </nav>
 
-  <div id="canvas-area">
-    <div id="toolbar">
-      <h2>版位畫布</h2>
-      <button class="btn ghost" id="btn-clear">🗑 清空畫布</button>
-      <button class="btn" id="btn-json">⬇ 下載 JSON</button>
-      <button class="btn primary" id="btn-xlsx">⬇ 下載試算表</button>
+  <div id="views">
+
+    <!-- ══════════════ 首頁：入口 ══════════════ -->
+    <div id="view-home" class="view">
+      <div id="home-wrap">
+        <div id="home-head">
+          <h1>🧱 副區版位工具</h1>
+          <p>選一個入口開始</p>
+        </div>
+        <div id="home-cards">
+          <button class="home-card" data-goto="generator">
+            <div class="hc-icon">🧩</div>
+            <div class="hc-title">工單生成器</div>
+            <div class="hc-desc">拖拉排版、產生工單試算表</div>
+          </button>
+          <button class="home-card" data-goto="import">
+            <div class="hc-icon">📥</div>
+            <div class="hc-title">匯入工單</div>
+            <div class="hc-desc">把填好的工單匯入，直接畫出成品</div>
+          </button>
+        </div>
+      </div>
     </div>
-    <div id="canvas-info"></div>
-    <div id="stage"><div id="row"></div></div>
-    <div id="footnote">
-      本機暫存已開啟：排版內容會自動存在這台瀏覽器裡，重新整理頁面不會消失。「下載試算表／JSON」會依畫布上目前放的每一格圖片，帶出對應的欄位（促標／LOGO圖／商品／品名／警語／圓標／CTA）跟字數上限。
+
+    <!-- ══════════════ 工單生成器（原本的畫布工具） ══════════════ -->
+    <div id="view-generator" class="view">
+      <div id="app">
+
+        <div id="palette">
+          <div id="palette-head">
+            <h1>🧩 素材庫</h1>
+            <p>把圖片拖到右邊畫布上排版。同一排只能放同一系列的圖，選了別的系列會自動反灰。</p>
+          </div>
+          <div id="palette-scroll"></div>
+        </div>
+
+        <div id="canvas-area">
+          <div id="toolbar">
+            <h2>版位畫布</h2>
+            <button class="btn ghost" id="btn-clear">🗑 清空畫布</button>
+            <button class="btn" id="btn-json">⬇ 下載 JSON</button>
+            <button class="btn primary" id="btn-xlsx">⬇ 下載試算表</button>
+          </div>
+          <div id="canvas-info"></div>
+          <div id="stage"><div id="row"></div></div>
+          <div id="footnote">
+            本機暫存已開啟：排版內容會自動存在這台瀏覽器裡，重新整理頁面不會消失。「下載試算表／JSON」會依畫布上目前放的每一格圖片，帶出對應的欄位（促標／LOGO圖／商品／品名／警語／圓標／CTA）跟字數上限。
+          </div>
+        </div>
+
+      </div>
     </div>
+
+    <!-- ══════════════ 匯入工單 ══════════════ -->
+    <div id="view-import" class="view">
+      <div id="import-app">
+
+        <div id="import-side">
+          <div id="import-side-head">
+            <h1>📥 匯入工單</h1>
+            <p>把填好的工單（.xlsx 或本工具下載的 .json）拖進來，或點擊選檔，會依內容自動畫出對應版位，並可以再編輯文字。</p>
+          </div>
+          <div id="import-drop">
+            <div class="id-icon">📄</div>
+            <div class="id-text"><b>拖曳檔案到這裡</b>或點擊選擇</div>
+            <input type="file" id="import-file-input" accept=".xlsx,.json" hidden>
+          </div>
+          <button class="btn ghost" id="btn-preview-all" style="margin:0 14px 10px;width:calc(100% - 28px);">🧪 直接預覽全部版位（不用匯入檔案）</button>
+          <div id="import-log"></div>
+
+          <div id="import-img-section">
+            <div id="import-img-head">🖼️ 圖片素材（可一次選多張）</div>
+            <div id="import-img-drop">
+              <div class="id-icon">🖼️</div>
+              <div class="id-text">拖曳圖片到這裡，或點擊選擇</div>
+              <input type="file" id="import-img-input" accept="image/*" multiple hidden>
+            </div>
+            <div id="import-img-gallery"><div class="im-empty">還沒有上傳圖片</div></div>
+          </div>
+
+          <div id="import-fields-scroll"></div>
+        </div>
+
+        <div id="import-canvas-area">
+          <div id="import-empty2">
+            <div class="ie-icon">📥</div>
+            <h2>還沒有匯入任何工單</h2>
+            <p>左側拖曳或選擇檔案開始</p>
+          </div>
+          <div id="import-preview-list"></div>
+        </div>
+
+      </div>
+    </div>
+
   </div>
 
 </div>
@@ -1063,8 +1252,8 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
       },
       {
         "type": "品名",
-        "limit": 4,
-        "count": 2
+        "limit": "4+4",
+        "count": 1
       },
       {
         "type": "警語",
@@ -1195,8 +1384,8 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
       },
       {
         "type": "品名",
-        "limit": 4,
-        "count": 2
+        "limit": "4+4",
+        "count": 1
       },
       {
         "type": "警語",
@@ -1227,8 +1416,8 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
       },
       {
         "type": "品名",
-        "limit": 4,
-        "count": 2
+        "limit": "4+4",
+        "count": 1
       },
       {
         "type": "警語",
@@ -1264,8 +1453,8 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
       },
       {
         "type": "品名",
-        "limit": 4,
-        "count": 2
+        "limit": "4+4",
+        "count": 1
       },
       {
         "type": "警語",
@@ -1605,8 +1794,8 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
       },
       {
         "type": "品名",
-        "limit": 4,
-        "count": 2
+        "limit": "4+4",
+        "count": 1
       },
       {
         "type": "警語",
@@ -1717,8 +1906,8 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
       },
       {
         "type": "品名",
-        "limit": 4,
-        "count": 2
+        "limit": "4+4",
+        "count": 1
       },
       {
         "type": "警語",
@@ -1744,8 +1933,8 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
       },
       {
         "type": "品名",
-        "limit": 4,
-        "count": 2
+        "limit": "4+4",
+        "count": 1
       },
       {
         "type": "警語",
@@ -1776,8 +1965,8 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
       },
       {
         "type": "品名",
-        "limit": 4,
-        "count": 2
+        "limit": "4+4",
+        "count": 1
       },
       {
         "type": "警語",
@@ -1809,8 +1998,8 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
       },
       {
         "type": "品名",
-        "limit": 4,
-        "count": 2
+        "limit": "4+4",
+        "count": 1
       },
       {
         "type": "警語",
@@ -1848,12 +2037,12 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
       {
         "type": "品名",
         "limit": 12,
-        "count": 2
+        "count": 1
       },
       {
         "type": "警語",
         "limit": 16,
-        "count": 2
+        "count": 1
       }
     ]
   },
@@ -1880,7 +2069,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
       {
         "type": "品名",
         "limit": 12,
-        "count": 2
+        "count": 1
       }
     ]
   },
@@ -1907,7 +2096,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
       {
         "type": "警語",
         "limit": 16,
-        "count": 2
+        "count": 1
       }
     ]
   },
@@ -1934,12 +2123,12 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
       {
         "type": "品名",
         "limit": 12,
-        "count": 2
+        "count": 1
       },
       {
         "type": "警語",
         "limit": 16,
-        "count": 2
+        "count": 1
       },
       {
         "type": "圓標",
@@ -1971,7 +2160,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
       {
         "type": "品名",
         "limit": 12,
-        "count": 2
+        "count": 1
       },
       {
         "type": "圓標",
@@ -2003,7 +2192,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
       {
         "type": "警語",
         "limit": 16,
-        "count": 2
+        "count": 1
       },
       {
         "type": "圓標",
@@ -2035,12 +2224,12 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
       {
         "type": "品名",
         "limit": 12,
-        "count": 2
+        "count": 1
       },
       {
         "type": "警語",
         "limit": 16,
-        "count": 2
+        "count": 1
       },
       {
         "type": "CTA",
@@ -2073,7 +2262,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
       {
         "type": "品名",
         "limit": 12,
-        "count": 2
+        "count": 1
       },
       {
         "type": "CTA",
@@ -2106,7 +2295,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
       {
         "type": "警語",
         "limit": 16,
-        "count": 2
+        "count": 1
       },
       {
         "type": "CTA",
@@ -2138,8 +2327,8 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
       },
       {
         "type": "品名",
-        "limit": 6,
-        "count": 2
+        "limit": "6+6",
+        "count": 1
       },
       {
         "type": "警語",
@@ -2170,8 +2359,8 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
       },
       {
         "type": "品名",
-        "limit": 6,
-        "count": 2
+        "limit": "6+6",
+        "count": 1
       },
       {
         "type": "警語",
@@ -2207,8 +2396,8 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
       },
       {
         "type": "品名",
-        "limit": 6,
-        "count": 2
+        "limit": "6+6",
+        "count": 1
       },
       {
         "type": "警語",
@@ -2245,8 +2434,8 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
       },
       {
         "type": "品名",
-        "limit": 6,
-        "count": 2
+        "limit": "6+6",
+        "count": 1
       },
       {
         "type": "警語",
@@ -2279,12 +2468,12 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
       {
         "type": "品名",
         "limit": 12,
-        "count": 2
+        "count": 1
       },
       {
         "type": "警語",
         "limit": 16,
-        "count": 2
+        "count": 1
       }
     ]
   },
@@ -2306,7 +2495,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
       {
         "type": "品名",
         "limit": 12,
-        "count": 2
+        "count": 1
       }
     ]
   },
@@ -2328,7 +2517,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
       {
         "type": "警語",
         "limit": 16,
-        "count": 2
+        "count": 1
       }
     ]
   },
@@ -2350,12 +2539,12 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
       {
         "type": "品名",
         "limit": 12,
-        "count": 2
+        "count": 1
       },
       {
         "type": "警語",
         "limit": 16,
-        "count": 2
+        "count": 1
       },
       {
         "type": "圓標",
@@ -2382,7 +2571,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
       {
         "type": "品名",
         "limit": 12,
-        "count": 2
+        "count": 1
       },
       {
         "type": "圓標",
@@ -2409,7 +2598,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
       {
         "type": "警語",
         "limit": 16,
-        "count": 2
+        "count": 1
       },
       {
         "type": "圓標",
@@ -2436,12 +2625,12 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
       {
         "type": "品名",
         "limit": 12,
-        "count": 2
+        "count": 1
       },
       {
         "type": "警語",
         "limit": 16,
-        "count": 2
+        "count": 1
       },
       {
         "type": "CTA",
@@ -2469,7 +2658,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
       {
         "type": "品名",
         "limit": 12,
-        "count": 2
+        "count": 1
       },
       {
         "type": "CTA",
@@ -2497,7 +2686,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
       {
         "type": "警語",
         "limit": 16,
-        "count": 2
+        "count": 1
       },
       {
         "type": "CTA",
@@ -2524,8 +2713,8 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
       },
       {
         "type": "品名",
-        "limit": 6,
-        "count": 2
+        "limit": "6+6",
+        "count": 1
       },
       {
         "type": "警語",
@@ -2551,8 +2740,8 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
       },
       {
         "type": "品名",
-        "limit": 6,
-        "count": 2
+        "limit": "6+6",
+        "count": 1
       },
       {
         "type": "警語",
@@ -2583,8 +2772,8 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
       },
       {
         "type": "品名",
-        "limit": 6,
-        "count": 2
+        "limit": "6+6",
+        "count": 1
       },
       {
         "type": "警語",
@@ -2616,8 +2805,8 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
       },
       {
         "type": "品名",
-        "limit": 6,
-        "count": 2
+        "limit": "6+6",
+        "count": 1
       },
       {
         "type": "警語",
@@ -2841,6 +3030,11 @@ html,body{height:100%;background:var(--bg);color:var(--ink);
 
 <!-- SheetJS：純前端產生 .xlsx，不需要伺服器 -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<script src="render-config.js"></script>
+<script src="core/core-engine.js"></script>
+<script src="core/schema-renderer.js"></script>
+<script src="image-layout.js"></script>
+<script src="editor-plugin.js"></script>
 
 <script>
 /* ════════════════════════════════════════
@@ -2968,7 +3162,7 @@ function buildWorkOrderGrid() {
   });
 
   var columns = cols.map(function (c, i) {
-    return { header: familyLabel(c.item.family) + '（' + c.item.family + '）', item: c.item };
+    return { header: familyLabel(c.item.family) + '（' + c.item.family + '-' + c.item.variant + '-' + c.item.combo + '）', item: c.item };
   });
 
   var rows = rowKeys.map(function (key) {
@@ -3060,6 +3254,530 @@ function exportWorkOrderXlsx() {
     document.body.removeChild(a);
     setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
   });
+}
+
+/* ════════════════════════════════════════
+   匯入工單
+   ────────────────────────────────────────
+   支援兩種檔案：
+   1. 本工具「下載JSON」產生的 .json（欄位是規則說明文字，不是填好的內容，
+      適合技術性使用者直接改 json 內容後重新匯入）
+   2. 填好的 .xlsx（依「下載試算表」的格式：標頭合併儲存格帶（系列字母），
+      下面每列 A欄=欄位名稱 B欄=內容，同一組版位佔兩欄）
+
+   偵測「哪個變體(variant)」的邏輯，不看品名/警語內容，只看裝飾類欄位：
+   - 有 CTA 列且內容含 icon 字樣 → variant 3（CTA圖示版）
+   - 有 CTA 列但不是icon → variant 4（CTA文字版）
+   - 沒有CTA、但有圓標 → variant 2
+   - 都沒有 → variant 1
+   E系列另外判斷：有促標 → E-1，沒有促標 → E-2；F系列固定 F-1。
+════════════════════════════════════════ */
+var LABEL_TO_FIELD_BASE = { '促標':'promo', 'LOGO圖':'logoImg', '商品':'productImg', '品名':'name', '警語':'warn', '圓標':'badge', 'CTA':'cta' };
+
+function detectVariant(fam, entries) {
+  if (fam === 'F') return 1;
+  function hasBase(base) { return entries.some(function (e) { return e.label === base || e.label.indexOf(base + '-') === 0; }); }
+  if (fam === 'E') return hasBase('促標') ? 1 : 2;
+  var ctaEntry = entries.filter(function (e) { return e.label === 'CTA'; })[0];
+  if (ctaEntry) return (ctaEntry.value && ctaEntry.value.indexOf('icon') !== -1) ? 3 : 4;
+  if (hasBase('圓標')) return 2;
+  return 1;
+}
+
+/* 把「標籤→內容」的原始清單，對到某個版位實際的欄位 key。
+   會自動處理新舊格式差異：
+   - 舊格式「品名-1」「品名-2」分兩欄，但目標版位只有一個「name」單一多行欄位
+     → 自動合併成一個欄位、用換行接起來
+   - 目標版位本身就是分開的欄位（例如 E 系列的 name1/name2）→ 依編號各自對應
+   - 完全對不到欄位的內容不會報錯，單純略過（保留原始資料在 col.raw 以防要除錯） */
+function smartMapEntriesToFields(entries, blockDef) {
+  var fieldKeys = blockDef.fields.map(function (f) { return f.key; });
+  var groups = {};
+  entries.forEach(function (e) {
+    var m = /^(.+?)(?:-(\d+))?$/.exec(e.label);
+    if (!m) return;
+    var base = m[1], idx = m[2] ? parseInt(m[2], 10) : null;
+    (groups[base] = groups[base] || []).push({ idx: idx, value: e.value });
+  });
+
+  var data = {};
+  Object.keys(groups).forEach(function (base) {
+    var baseKey = LABEL_TO_FIELD_BASE[base];
+    if (!baseKey) return;
+    var items = groups[base].slice().sort(function (a, b) { return (a.idx || 0) - (b.idx || 0); });
+
+    if (items.length === 1 && items[0].idx == null) {
+      if (fieldKeys.indexOf(baseKey) !== -1) data[baseKey] = items[0].value;
+      else if (fieldKeys.indexOf(baseKey + '1') !== -1) data[baseKey + '1'] = items[0].value;
+    } else if (fieldKeys.indexOf(baseKey) !== -1 && fieldKeys.indexOf(baseKey + '1') === -1) {
+      /* 目標是單一欄位（可能是多行文字），把多筆內容合併 */
+      data[baseKey] = items.map(function (it) { return it.value; }).filter(Boolean).join('\n');
+    } else {
+      /* 目標本身分好幾欄，依編號各自對應 */
+      items.forEach(function (it, i) {
+        var key = baseKey + (it.idx != null ? it.idx : (i + 1));
+        if (fieldKeys.indexOf(key) !== -1) data[key] = it.value;
+      });
+    }
+  });
+  return data;
+}
+
+var blocksLoadedForImport = false;
+var blocksLoadingCallbacks = null; /* null=目前沒有在載入；陣列=正在載入中，後續呼叫排隊等這次載完 */
+function ensureBlocksLoaded(cb) {
+  if (blocksLoadedForImport) { cb(); return; }
+  if (blocksLoadingCallbacks) { blocksLoadingCallbacks.push(cb); return; } /* 已經有一次載入在進行中，排隊等它，不要再開一次 */
+  blocksLoadingCallbacks = [cb];
+  var importLog = document.getElementById('import-log');
+  if (importLog) importLog.innerHTML = '<span class="ok">讀取成功，載入版位模板中…</span>';
+  bnLoadAllBlocks(function (result) {
+    /* 只有「全部」都成功，才把這次結果鎖定下來，之後不再重抓；
+       只要有任何一個失敗，這個標記就不設，下次呼叫（不管是使用者點重試、
+       或再次匯入）都會整批重新嘗試一次，不會卡在一次失敗的結果上不動。 */
+    if (result && result.total > 0 && result.succeeded >= result.total) {
+      blocksLoadedForImport = true;
+    } else {
+      console.error('[BNCore] 版位模板沒有全部載入成功（' + (result ? result.succeeded : 0) + '/' + (result ? result.total : '?') + '），保留重試機會');
+    }
+    var queued = blocksLoadingCallbacks; blocksLoadingCallbacks = null;
+    queued.forEach(function (fn) { fn(); });
+  }, 'blocks/');
+}
+
+/* 解析本工具自己下載的 .json → 回傳「原始」欄位清單，還沒對應到實際版位欄位 */
+function parseImportOwnJSON(obj) {
+  if (!obj || !obj.columns) return [];
+  return obj.columns.map(function (c, ci) {
+    var entries = [];
+    (obj.rows || []).forEach(function (r) {
+      var cell = r.cells[ci];
+      if (cell && cell.value) entries.push({ label: r.key, value: cell.value });
+    });
+    return { family: c.family, variant: c.variant, combo: c.combo, entries: entries, header: c.label };
+  });
+}
+
+/* 解析填好的 .xlsx（用 ExcelJS 讀） → 同樣回傳原始欄位清單 */
+function parseImportXlsx(arrayBuffer) {
+  return new ExcelJS.Workbook().xlsx.load(arrayBuffer).then(function (wb) {
+    var ws = wb.worksheets[0];
+    var columns = [];
+    var col = 2;
+    while (col <= ws.columnCount) {
+      var headerVal = ws.getCell(1, col).value;
+      if (!headerVal) break;
+      /* 新格式：標頭直接編碼「家族-變體-組合」三段，例如（A-1-2），可以精準對到正確版位；
+         舊格式的檔案只有單一字母（A），這種情況下才退回用內容猜變體（可能不夠精準，
+         因為現在同一個變體底下、不同組合的排版本身就會不一樣） */
+      var m3 = /（([A-F])-(\d+)-(\d+)）\s*$/.exec(String(headerVal));
+      var m1 = /（([A-F])）\s*$/.exec(String(headerVal));
+      columns.push({
+        col: col, header: String(headerVal),
+        family: m3 ? m3[1] : (m1 ? m1[1] : null),
+        variant: m3 ? m3[2] : null,
+        combo: m3 ? m3[3] : null,
+        entries: []
+      });
+      col += 2;
+    }
+    var maxRow = ws.rowCount;
+    for (var r = 2; r <= maxRow; r++) {
+      columns.forEach(function (c) {
+        var label = ws.getCell(r, c.col).value;
+        var value = ws.getCell(r, c.col + 1).value;
+        if (label != null && String(label).trim() !== '') {
+          c.entries.push({ label: String(label).trim(), value: value != null ? String(value).trim() : '' });
+        }
+      });
+    }
+    return columns.filter(function (c) { return c.family; }).map(function (c) {
+      var variant = c.variant || detectVariant(c.family, c.entries);
+      var combo = c.combo || detectCombo(c.family, c.entries);
+      return { family: c.family, variant: variant, combo: combo, entries: c.entries, header: c.header };
+    });
+  });
+}
+
+/* 舊格式檔案（標頭只有家族字母，沒有編碼組合編號）才會用到這個猜測邏輯：
+   依品名/警語是否都有內容，猜是哪個組合（1=都有 2=只有品名 3=只有警語 4=都沒有）。
+   注意：這只是還沒編碼組合編號的舊檔案的退路，不保證每個版位都準， 
+   建議都用新版工單生成器重新產生的試算表匯入，才會是精準對應。 */
+function detectCombo(fam, entries) {
+  function hasNonEmpty(base) {
+    return entries.some(function (e) {
+      var matchBase = e.label === base || e.label.indexOf(base + '-') === 0;
+      return matchBase && e.value && String(e.value).trim() !== '';
+    });
+  }
+  var hasName = hasNonEmpty('品名');
+  var hasWarn = hasNonEmpty('警語');
+  if (hasName && hasWarn) return 1;
+  if (hasName) return 2;
+  if (hasWarn) return 3;
+  return 4;
+}
+
+/* ════════════════════════════════════════
+   圖片素材：可以一次上傳多張，供 LOGO/商品 這類圖片欄位選用
+════════════════════════════════════════ */
+var uploadedImages = []; /* { name, url } */
+
+function handleImageFiles(fileList) {
+  var files = Array.prototype.filter.call(fileList, function (f) { return f.type.indexOf('image/') === 0; });
+  if (!files.length) return;
+  files.forEach(function (f) {
+    var url = URL.createObjectURL(f);
+    uploadedImages.push({ name: f.name, url: url });
+  });
+  renderImageGallery();
+  autoMatchImagesToColumns();
+  renderImportFieldsForCurrentColumns();
+}
+
+/* 試算表裡圖片欄位填的通常是「檔名」（例如 apple.png），不是真的網址。
+   這裡自動比對：檔名跟目前上傳的圖片素材一樣（不分大小寫），就自動換成真的圖片網址。 */
+function autoMatchImagesToColumns() {
+  currentImportColumns.forEach(function (col) {
+    var def = BNCore.getBlock(col.blockId);
+    if (!def) return;
+    def.fields.forEach(function (f) {
+      if (f.type !== 'image') return;
+      var val = col.data[f.key];
+      if (!val) return;
+      /* 欄位可能是逗號分隔的多個檔名（一個範圍要放好幾張圖），
+         要先拆開、每個檔名各自比對已上傳的圖片，再重新用逗號接回去，
+         不能直接拿整串去比對（不會有任何一張上傳的圖片檔名長那樣） */
+      var parts = String(val).split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+      var changed = false;
+      var resolved = parts.map(function (part) {
+        if (/^(https?:|blob:|data:)/.test(part)) return part; /* 已經是網址就不動它 */
+        var match = uploadedImages.filter(function (img) { return img.name.toLowerCase() === part.toLowerCase(); })[0];
+        if (match) { changed = true; return match.url; }
+        return part;
+      });
+      if (changed) col.data[f.key] = resolved.join(',');
+    });
+  });
+}
+
+function renderImageGallery() {
+  var wrap = document.getElementById('import-img-gallery');
+  if (!wrap) return;
+  if (!uploadedImages.length) { wrap.innerHTML = '<div class="im-empty">還沒有上傳圖片</div>'; return; }
+  wrap.innerHTML = uploadedImages.map(function (img, i) {
+    return '<div class="im-thumb" title="' + esc(img.name) + '">' +
+      '<img src="' + img.url + '">' +
+      '<button class="im-rm" data-i="' + i + '">✕</button>' +
+      '<div class="im-name">' + esc(img.name) + '</div>' +
+    '</div>';
+  }).join('');
+  wrap.querySelectorAll('.im-rm').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      uploadedImages.splice(+btn.getAttribute('data-i'), 1);
+      renderImageGallery();
+    });
+  });
+}
+
+function imagePickerHtml(currentVal) {
+  var opts = '<option value="">— 選擇已上傳圖片 —</option>' + uploadedImages.map(function (img) {
+    return '<option value="' + esc(img.url) + '"' + (img.url === currentVal ? ' selected' : '') + '>' + esc(img.name) + '</option>';
+  }).join('');
+  return '<select class="img-pick">' + opts + '</select>';
+}
+
+/* 目前畫面上的匯入結果（重新上傳圖片後要重畫欄位面板用） */
+var currentImportColumns = [];
+var IMPORT_STORAGE_KEY = 'wo_import_state_v1';
+
+function saveImportState() {
+  try {
+    var toSave = currentImportColumns.map(function (c) {
+      return { blockId: c.blockId, data: c.data, header: c.header };
+    });
+    localStorage.setItem(IMPORT_STORAGE_KEY, JSON.stringify(toSave));
+  } catch (e) { /* 存不了就算了，不影響操作 */ }
+}
+
+function loadImportState() {
+  try { return JSON.parse(localStorage.getItem(IMPORT_STORAGE_KEY)) || null; }
+  catch (e) { return null; }
+}
+
+
+function renderImportFieldsForCurrentColumns() {
+  if (currentImportColumns.length) renderImportColumns(currentImportColumns, true);
+}
+
+/* 「直接預覽全部版位」專用：純粹由上到下堆疊，不包卡片外框，
+   只是要快速看每個版位長怎樣，跟「匯入工單」正式呈現(整排無縫拼接)是不同用途 */
+function renderPreviewAllStacked(columns) {
+  var list = document.getElementById('import-preview-list');
+  var scroll = document.getElementById('import-fields-scroll');
+  list.classList.add('show');
+  document.getElementById('import-empty2').style.display = 'none';
+  scroll.innerHTML = '<div style="padding:8px;font-size:11.5px;color:var(--ink3);">預覽模式沒有欄位編輯，選「匯入工單」才會有。</div>';
+
+  var html = '';
+  columns.forEach(function (col, idx) {
+    var def = BNCore.getBlock(col.blockId);
+    if (!def) { html += '<div class="imp-col">⚠ 找不到版位「' + esc(col.blockId) + '」</div>'; return; }
+    var scale = Math.min(1, 900 / def.width);
+    html +=
+      '<div>' +
+      '<div style="font-size:11px;color:var(--ink3);margin-bottom:4px;">' + esc(def.name) + '　' + def.width + '×' + def.height + '</div>' +
+      '<div style="width:' + Math.round(def.width * scale) + 'px;height:' + Math.round(def.height * scale) + 'px;overflow:hidden;">' +
+      '<div id="prevall-mount-' + idx + '" style="transform:scale(' + scale + ');transform-origin:top left;width:' + def.width + 'px;height:' + def.height + 'px;"></div>' +
+      '</div></div>';
+  });
+  list.innerHTML = html;
+
+  columns.forEach(function (col, idx) {
+    var def = BNCore.getBlock(col.blockId);
+    if (!def) return;
+    var mount = document.getElementById('prevall-mount-' + idx);
+    if (mount) mount.innerHTML = BNCore.renderInstance(col.blockId, col.data);
+  });
+}
+
+function colorToHex(v) {
+  if (!v) return '#000000';
+  v = String(v).trim();
+  if (/^#[0-9a-fA-F]{6}$/.test(v)) return v;
+  var m = /^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/.exec(v);
+  if (m) {
+    return '#' + [m[1], m[2], m[3]].map(function (n) {
+      var h = parseInt(n, 10).toString(16);
+      return h.length === 1 ? '0' + h : h;
+    }).join('');
+  }
+  return '#000000';
+}
+
+/* 商品圖編輯按鈕(左側工具列，商品欄位右下角的✏️)：
+   找到畫布上目前實際渲染出來的<img>，交給外掛編輯器(editor-plugin.js)處理。
+   外掛編輯完成後會直接把新結果寫進那個<img>的src屬性──這裡用
+   MutationObserver監看src有沒有被改掉，改掉了就同步寫回我們自己的資料
+   (col.data)裡，這樣才會存檔、下次重新渲染也不會被蓋回舊圖。
+   如果欄位本身是逗號分隔的多張圖，目前只支援編輯「第一張」，
+   其他張維持原樣、用逗號接回去。 */
+function openProductImageEditor(idx, fieldKey, textInput) {
+  if (typeof window.HBNProductEditorPlugin === 'undefined' && typeof window.openEraseEditor === 'undefined') {
+    alert('商品圖編輯器外掛(editor-plugin.js)還沒載入成功，確認檔案是否放在跟 index.html 同一層');
+    return;
+  }
+  var mount = document.getElementById('imp-mount-' + idx);
+  if (!mount) return;
+  var group = mount.querySelector('.bn-imggroup[data-field-key="' + fieldKey + '"]');
+  var imgEl = group ? group.querySelector('img.bn-imggroup-img') : null;
+  if (!imgEl || !imgEl.src) { alert('這個欄位還沒有圖片，先上傳或填入圖片網址再編輯'); return; }
+
+  var col = currentImportColumns[idx];
+  var originalValue = col.data[fieldKey] || '';
+  var parts = originalValue.split(',').map(function (s) { return s.trim(); });
+
+  /* 監看這張<img>的src有沒有被外掛編輯器改掉 */
+  var mo = new MutationObserver(function (mutations) {
+    mutations.forEach(function (m) {
+      if (m.attributeName !== 'src') return;
+      var newSrc = imgEl.src;
+      parts[0] = newSrc;
+      var newValue = parts.join(',');
+      col.data[fieldKey] = newValue;
+      textInput.value = newValue;
+      saveImportState();
+      mo.disconnect();
+    });
+  });
+  mo.observe(imgEl, { attributes: true, attributeFilter: ['src'] });
+
+  if (window.HBNProductEditorPlugin && window.HBNProductEditorPlugin.open) {
+    window.HBNProductEditorPlugin.open(imgEl);
+  } else {
+    window.openEraseEditor(imgEl);
+  }
+}
+
+function renderImportColumns(columns, skipPreviewRerender) {
+  currentImportColumns = columns;
+  saveImportState();
+  var scroll = document.getElementById('import-fields-scroll');
+  var list = document.getElementById('import-preview-list');
+  list.classList.add('show');
+  document.getElementById('import-empty2').style.display = 'none';
+  scroll.innerHTML = '';
+
+  /* 先算整排的總寬度/最大高度，跟版位畫布(工單生成器)一樣，用同一個縮放比例
+     把所有格子拼成「一整條」，不要每格各自一張卡片——這樣才是實際成品的樣子 */
+  var defs = columns.map(function (c) { return BNCore.getBlock(c.blockId); });
+  var totalWidth = defs.reduce(function (sum, d) { return sum + (d ? d.width : 0); }, 0);
+  var maxHeight = defs.reduce(function (m, d) { return Math.max(m, d ? d.height : 0); }, 0);
+  var scale = totalWidth ? Math.min(1, 900 / totalWidth) : 1;
+
+  if (!skipPreviewRerender) {
+    list.innerHTML =
+      '<div id="imp-strip-wrap" style="width:' + Math.round(totalWidth * scale) + 'px;height:' + Math.round(maxHeight * scale) + 'px">' +
+      '<div id="imp-strip" style="transform:scale(' + scale + ');width:' + totalWidth + 'px;height:' + maxHeight + 'px"></div>' +
+      '</div>';
+  }
+  var strip = document.getElementById('imp-strip');
+  if (!skipPreviewRerender && strip) strip.innerHTML = '';
+
+  var cumLeft = 0;
+  columns.forEach(function (col, idx) {
+    var def = BNCore.getBlock(col.blockId);
+    if (!def) {
+      var warnBox = document.createElement('div');
+      warnBox.className = 'imp-col';
+      warnBox.innerHTML = '⚠ 找不到版位「' + esc(col.blockId) + '」（' + esc(col.header || '') + '）' +
+        '<button class="btn ghost imp-retry-btn" style="margin-top:8px;width:100%;">🔄 重新載入版位模板再試一次</button>';
+      scroll.appendChild(warnBox);
+      warnBox.querySelector('.imp-retry-btn').addEventListener('click', function () {
+        blocksLoadedForImport = false; /* 強制重新抓一次，不管之前的狀態 */
+        blocksLoadingCallbacks = null;
+        ensureBlocksLoaded(function () { renderImportColumns(columns); });
+      });
+      return;
+    }
+
+    var box = document.createElement('div');
+    box.className = 'imp-col';
+    var fieldsHtml = def.fields.map(function (f) {
+      var val = col.data[f.key] != null ? col.data[f.key] : f.default;
+      var inputHtml;
+      var maxAttr = f.maxLength ? ' maxlength="' + f.maxLength + '"' : '';
+      if (f.type === 'color') {
+        var hex = colorToHex(val);
+        inputHtml = '<div class="color-field-row">' +
+          '<input type="color" class="fv-picker" value="' + esc(hex) + '">' +
+          '<input type="text" class="fv" placeholder="#rrggbb 或 rgb(...)" value="' + esc(val || '') + '"></div>';
+      } else if (f.type === 'image') {
+        var isProduct = /^productImg/.test(f.key);
+        var editBtnHtml = isProduct
+          ? '<button type="button" class="img-edit-btn" data-editkey="' + esc(f.key) + '" title="開啟商品圖編輯器（去背/裁切/加陰影）">✏️</button>'
+          : '';
+        inputHtml = '<div class="img-field-row">' + imagePickerHtml(val) +
+          '<input type="text" class="fv" placeholder="或貼圖片網址" value="' + esc(val) + '">' + editBtnHtml + '</div>';
+      } else {
+        inputHtml = '<input type="text" class="fv"' + maxAttr + ' value="' + esc(val) + '">';
+      }
+      var limitHint = f.maxLength ? '<span class="field-limit">限' + f.maxLength + '字</span>' : '';
+      return '<div class="field" data-key="' + f.key + '"><label>' + esc(f.label) + limitHint + '</label>' + inputHtml + '</div>';
+    }).join('');
+    box.innerHTML = '<div class="ic-head">' + (idx + 1) + '. ' + esc(def.name) + '</div>' + fieldsHtml;
+    scroll.appendChild(box);
+
+    function updateAndRerender(key, value) {
+      col.data[key] = value;
+      saveImportState();
+      var mount = document.getElementById('imp-mount-' + idx);
+      if (mount) mount.innerHTML = BNCore.renderInstance(col.blockId, col.data, { editable: true });
+      bindCanvasEditable(mount, col, idx);
+    }
+
+    box.querySelectorAll('.field').forEach(function (fieldEl) {
+      var key = fieldEl.getAttribute('data-key');
+      var textInput = fieldEl.querySelector('input.fv');
+      textInput.addEventListener('input', function () {
+        updateAndRerender(key, this.value);
+        var colorPicker = fieldEl.querySelector('.fv-picker');
+        if (colorPicker) colorPicker.value = colorToHex(this.value);
+      });
+      var picker = fieldEl.querySelector('.img-pick');
+      if (picker) {
+        picker.addEventListener('change', function () {
+          if (this.value) { textInput.value = this.value; updateAndRerender(key, this.value); }
+        });
+      }
+      var colorPicker = fieldEl.querySelector('.fv-picker');
+      if (colorPicker) {
+        colorPicker.addEventListener('input', function () {
+          textInput.value = this.value;
+          updateAndRerender(key, this.value);
+        });
+      }
+      var editBtn = fieldEl.querySelector('.img-edit-btn');
+      if (editBtn) {
+        editBtn.addEventListener('click', function () {
+          openProductImageEditor(idx, key, textInput);
+        });
+      }
+    });
+
+    var myLeft = cumLeft;
+    cumLeft += def.width;
+
+    if (!skipPreviewRerender && strip) {
+      var slot = document.createElement('div');
+      slot.className = 'imp-slot';
+      slot.style.cssText = 'position:absolute;left:' + myLeft + 'px;top:0;width:' + def.width + 'px;height:' + def.height + 'px;overflow:hidden;';
+      slot.innerHTML = '<div class="imp-mount" id="imp-mount-' + idx + '" style="width:' + def.width + 'px;height:' + def.height + 'px"></div>';
+      strip.appendChild(slot);
+    }
+    var mountEl = document.getElementById('imp-mount-' + idx);
+    if (mountEl) {
+      mountEl.innerHTML = BNCore.renderInstance(col.blockId, col.data, { editable: true });
+      bindCanvasEditable(mountEl, col, idx);
+    }
+  });
+}
+
+/* 讓畫布上 contenteditable 的文字，編輯完（失焦或輸入時）同步寫回資料，
+   並且順手把側欄對應的輸入框也更新，兩邊互相同步 */
+function bindCanvasEditable(mountEl, col, idx) {
+  if (!mountEl) return;
+  mountEl.querySelectorAll('[contenteditable="true"]').forEach(function (el) {
+    var key = el.getAttribute('data-field');
+    if (!key) return;
+    el.addEventListener('input', function () {
+      col.data[key] = el.textContent;
+      saveImportState();
+      var sideInput = document.querySelector('#import-fields-scroll .field[data-key="' + key + '"] input.fv');
+      if (sideInput) sideInput.value = el.textContent;
+    });
+  });
+}
+
+function afterImportParsed(rawColumns) {
+  var importLog = document.getElementById('import-log');
+  if (!rawColumns || !rawColumns.length) { importLog.innerHTML = '<span class="err">沒有讀到任何版位資料，確認檔案格式是否正確</span>'; return; }
+  importLog.innerHTML = '<span class="ok">✓ 讀到 ' + rawColumns.length + ' 格</span>';
+  ensureBlocksLoaded(function () {
+    var columns = rawColumns.map(function (c) {
+      var blockId = 'subarea_' + c.family + '_' + c.variant + '_' + c.combo;
+      var def = BNCore.getBlock(blockId);
+      var data = def ? Object.assign({}, BNCore.defaultData(blockId), smartMapEntriesToFields(c.entries, def)) : {};
+      return { blockId: blockId, data: data, header: c.header };
+    });
+    currentImportColumns = columns;
+    autoMatchImagesToColumns();
+    renderImportColumns(columns);
+    importLog.innerHTML = '<span class="ok">✓ 已畫出 ' + columns.length + ' 格</span>';
+  });
+}
+
+function handleImportFile(file) {
+  var importLog = document.getElementById('import-log');
+  importLog.innerHTML = '讀取中…';
+  var name = file.name.toLowerCase();
+  var reader = new FileReader();
+  reader.onload = function () {
+    try {
+      if (name.endsWith('.json')) {
+        afterImportParsed(parseImportOwnJSON(JSON.parse(reader.result)));
+      } else {
+        parseImportXlsx(reader.result).then(afterImportParsed).catch(function (err) {
+          importLog.innerHTML = '<span class="err">解析失敗：' + esc(err.message) + '</span>';
+        });
+      }
+    } catch (err) {
+      importLog.innerHTML = '<span class="err">解析失敗：' + esc(err.message) + '</span>';
+    }
+  };
+  reader.onerror = function () { importLog.innerHTML = '<span class="err">檔案讀取失敗</span>'; };
+  if (name.endsWith('.json')) reader.readAsText(file);
+  else reader.readAsArrayBuffer(file);
 }
 
 /* state.group: null 或 'AB' / 'CDE' / 'F'（可混搭群組，不是單一系列）
@@ -3332,7 +4050,7 @@ function renderCanvas() {
   var filledCount = state.slots.filter(Boolean).length;
   var usedFams = state.slots.filter(Boolean).map(function (s) { return s.family; })
     .filter(function (v, idx, arr) { return arr.indexOf(v) === idx; });
-  var totalW = n * w + (n - 1) * 14;
+  var totalW = n * w;
   info.innerHTML =
     '<span>群組：<b>' + groupLabel + '</b>' + (GROUPS[g].families.length > 1 ? '（可混搭）' : '（不可混搭）') + '</span>' +
     '<span>目前用到：<b>' + (usedFams.length ? usedFams.join('、') : '－') + '</b></span>' +
@@ -3411,13 +4129,83 @@ document.getElementById('btn-relock').addEventListener('click', relock);
 document.getElementById('btn-export-config').addEventListener('click', exportConfig);
 
 /* ════════════════════════════════════════
+   頁面切換：首頁 / 工單生成器 / 匯入工單
+════════════════════════════════════════ */
+function showView(name) {
+  document.querySelectorAll('.view').forEach(function (v) { v.classList.toggle('active', v.id === 'view-' + name); });
+  document.querySelectorAll('.nav-item').forEach(function (b) { b.classList.toggle('active', b.getAttribute('data-view') === name); });
+  /* 鎖頭跟編輯提示條只跟「工單生成器」有關，其他頁面藏起來 */
+  var showLock = (name === 'generator');
+  lockFab.style.display = showLock ? '' : 'none';
+  if (!showLock) editBanner.classList.remove('show');
+  else editBanner.classList.toggle('show', unlocked);
+  try { sessionStorage.setItem('wo_last_view', name); } catch (e) {}
+}
+document.querySelectorAll('.nav-item').forEach(function (b) {
+  b.addEventListener('click', function () { showView(b.getAttribute('data-view')); });
+});
+document.querySelectorAll('.home-card').forEach(function (b) {
+  b.addEventListener('click', function () { showView(b.getAttribute('data-goto')); });
+});
+
+/* ════════════════════════════════════════
    初始化
 ════════════════════════════════════════ */
 updateLockUI();
 renderPalette();
 renderCanvas();
 loadRemoteConfig(function () { renderPalette(); }); /* 讀 config.json（file:// 或檔案不存在時安靜失敗，不影響其他功能） */
+/* ════════════════════════════════════════
+   匯入工單：拖放區域事件
+════════════════════════════════════════ */
+var importDrop = document.getElementById('import-drop');
+var importFileInput = document.getElementById('import-file-input');
+importDrop.addEventListener('click', function () { importFileInput.click(); });
+importFileInput.addEventListener('change', function (e) { if (e.target.files[0]) handleImportFile(e.target.files[0]); });
+importDrop.addEventListener('dragover', function (e) { e.preventDefault(); importDrop.classList.add('dragover'); });
+importDrop.addEventListener('dragleave', function () { importDrop.classList.remove('dragover'); });
+importDrop.addEventListener('drop', function (e) {
+  e.preventDefault(); importDrop.classList.remove('dragover');
+  if (e.dataTransfer.files[0]) handleImportFile(e.dataTransfer.files[0]);
+});
+
+var importImgDrop = document.getElementById('import-img-drop');
+var importImgInput = document.getElementById('import-img-input');
+importImgDrop.addEventListener('click', function () { importImgInput.click(); });
+importImgInput.addEventListener('change', function (e) { handleImageFiles(e.target.files); e.target.value = ''; });
+importImgDrop.addEventListener('dragover', function (e) { e.preventDefault(); importImgDrop.classList.add('dragover'); });
+importImgDrop.addEventListener('dragleave', function () { importImgDrop.classList.remove('dragover'); });
+importImgDrop.addEventListener('drop', function (e) {
+  e.preventDefault(); importImgDrop.classList.remove('dragover');
+  handleImageFiles(e.dataTransfer.files);
+});
+renderImageGallery();
+
+/* 除錯用：不透過任何試算表/JSON，直接把目前所有已註冊的版位都畫出來，
+   純粹測試「載入版位模板 → 渲染」這條路徑本身是否正常。 */
+document.getElementById('btn-preview-all').addEventListener('click', function () {
+  var importLog = document.getElementById('import-log');
+  importLog.innerHTML = '<span class="ok">載入版位模板中…</span>';
+  ensureBlocksLoaded(function () {
+    var ids = BNCore.getBlocks().map(function (b) { return b.id; }).filter(function (id) { return id !== 'msbn3p'; }).sort();
+    var columns = ids.map(function (id) {
+      return { blockId: id, data: BNCore.defaultData(id), header: id };
+    });
+    renderPreviewAllStacked(columns);
+    importLog.innerHTML = '<span class="ok">✓ 共 ' + ids.length + ' 個版位模板，全部畫在右邊了（實際載入成功的數量，如果少於19，代表確實有版位載入失敗）</span>';
+  });
+});
+
+showView('home'); /* 每次打開都先回到首頁入口 */
+ensureBlocksLoaded(function () {}); /* 背景預先載入版位模板，使用者實際匯入時大多已經載好了；跟使用者觸發的載入共用同一個機制，不會重複觸發 */
+
+/* 還原上次匯入工單的本機暫存內容（不用重新上傳檔案） */
+var savedImportState = loadImportState();
+if (savedImportState && savedImportState.length) {
+  ensureBlocksLoaded(function () { renderImportColumns(savedImportState); });
+}
 </script>
+
 
 </body>
 </html>
