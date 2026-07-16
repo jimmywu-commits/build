@@ -77,23 +77,20 @@
 
   /* 一次性注入字型宣告：所有版位統一用 ShopeeNotoSans (content)，
      字型檔放在跟 index.html 同層的 fonts/ 資料夾底下，檔名如下三個：
-       fonts/ShopeeNotoSans-Regular.woff2 （400 Regular，CTA文字用）
-       fonts/ShopeeNotoSans-Medium.woff2  （500 Medium，警語/圓標用）
-       fonts/ShopeeNotoSans-Bold.woff2    （700 Bold，促標/品名用）
+       fonts/ShopeeNotoSans(content)-Regular.ttf （400 Regular，CTA文字用）
+       fonts/ShopeeNotoSans(content)-Medium.ttf  （500 Medium，警語/圓標用）
+       fonts/ShopeeNotoSans(content)-Bold.ttf    （700 Bold，促標/品名用）
      檔名要完全一致才抓得到；如果你實際拿到的字型檔名不同，把下面三個 url() 路徑改成實際檔名即可。 */
   if (!document.getElementById('bn-fontface')) {
     var fontStyle = document.createElement('style');
     fontStyle.id = 'bn-fontface';
     fontStyle.textContent =
       '@font-face{font-family:"ShopeeNotoSans (content)";font-weight:400;font-style:normal;' +
-      'src:url("fonts/ShopeeNotoSans-Regular.woff2") format("woff2"),' +
-      'url("fonts/ShopeeNotoSans-Regular.woff") format("woff");}' +
+      'src:url("fonts/ShopeeNotoSans(content)-Regular.ttf") format("truetype");}' +
       '@font-face{font-family:"ShopeeNotoSans (content)";font-weight:500;font-style:normal;' +
-      'src:url("fonts/ShopeeNotoSans-Medium.woff2") format("woff2"),' +
-      'url("fonts/ShopeeNotoSans-Medium.woff") format("woff");}' +
+      'src:url("fonts/ShopeeNotoSans(content)-Medium.ttf") format("truetype");}' +
       '@font-face{font-family:"ShopeeNotoSans (content)";font-weight:700;font-style:normal;' +
-      'src:url("fonts/ShopeeNotoSans-Bold.woff2") format("woff2"),' +
-      'url("fonts/ShopeeNotoSans-Bold.woff") format("woff");}';
+      'src:url("fonts/ShopeeNotoSans(content)-Bold.ttf") format("truetype");}';
     document.head.appendChild(fontStyle);
   }
 
